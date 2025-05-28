@@ -306,6 +306,31 @@ def installOpt(args: Namespace):
     return
 
 
+def uninstallOpt(args: Namespace):
+    modules: list[str] = args.module
+
+    with open('amor.toml', 'r') as amor_conf:
+        conf = load(amor_conf)
+
+    deps: dict[str, str] = conf["dependencies"]
+
+    to_delete: list[str] = [dep for dep in deps if dep in modules]
+
+    for dep in to_delete:
+        print(f'Uninstalling {dep}')
+        try:
+            rmtree(f'./.amor/{dep}')
+
+            del conf["dependencies"][dep]
+        except:
+            print(f'Failed to uninstall {dep}.') 
+    
+    with open('amor.toml', 'w') as amor_conf:
+        dump(conf, amor_conf)
+
+    return
+
+
 def runOpt(args: Namespace):
     script = args.script[0]
     with open('amor.toml', 'r') as conf:
@@ -399,10 +424,10 @@ init.set_defaults(func=initOpt)
 
 # Install
 install = subparsers.add_parser("install", aliases=["i", "add"], help="Install\
-        the given module to this project.")
+        the given module(s) to this project.")
 install.add_argument('--force', '-f', action="store_true", help="Force the\
         force the re-installation of all modules.")
-install.add_argument("module", nargs="*", type=str, help="Modules to install\
+install.add_argument("module", nargs="*", type=str, help="Module(s) to install\
                      from Github. Given in format\
                      `<username>/<repository>[@<tag>]`. If <tag> is not present\
                      the most current version will be installed. If <tag> is\
@@ -411,6 +436,12 @@ install.add_argument("module", nargs="*", type=str, help="Modules to install\
 install.set_defaults(func=installOpt)
 
 # Uninstall
+uninstall = subparsers.add_parser('uninstall', aliases=['u', 'remove'], help="\
+        Uninstall the given module(s) from the project.")
+uninstall.add_argument('module', nargs="+", type=str, help="Module(s) to\
+        uninstall, given in format `<module_name>` (as you would require\
+        in a Lua script).")
+uninstall.set_defaults(func=uninstallOpt)
 
 # Run
 run = subparsers.add_parser("run", aliases=["r"], help="Run a script defined in\
