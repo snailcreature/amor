@@ -15,7 +15,7 @@ test = "echo \"Hello, World!\""
 build = "echo \"No build script defined!\""
 
 [dependencies]
-zip = "zip:matiasah/zip@None=f7808d24127e7ea8458c6045b61a69295e102ec5"
-lfs = "lfs:lunarmodules/luafilesystem@None=09511782201302ade916d4b250d01a6c61b56844"
+zip = "matiasah/zip@None=f7808d24127e7ea8458c6045b61a69295e102ec5"
+lfs = "lunarmodules/luafilesystem@None=09511782201302ade916d4b250d01a6c61b56844"
 
 [dev_dependencies]

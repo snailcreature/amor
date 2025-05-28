@@ -1,10 +1,11 @@
 from argparse import ArgumentParser, Namespace
+from git.refs.head import HEAD
 from toml import load, dump
 from os import mkdir, path, getcwd, environ, listdir, rename
 from shutil import ignore_patterns, rmtree, copytree
 from subprocess import PIPE, run as cmd
-from git import Repo
 from luaparser import ast
+from git import Repo
 from lupa.lua54 import LuaRuntime
 
 
@@ -167,6 +168,33 @@ def initOpt(args: Namespace):
 
 def installOpt(args: Namespace):
     modules: list[str] = args.module
+    
+    hashes = {}
+
+    if args.force:
+        for dir in listdir('./.amor'):
+            try:
+                rmtree(f"./.amor/{dir}/")
+            except:
+                print(f'Failed to delete {dir}')
+
+    if len(modules) == 0:
+        print('Installing from amor.toml...')
+        with open('amor.toml', 'r') as amor_conf:
+            conf = load(amor_conf)
+
+        found_mods: dict[str, str] = conf["dependencies"]
+        for mod in found_mods.keys():
+            if path.exists(f"./.amor/{mod}"):
+                print(f"{mod} already installed!")
+                continue
+            
+            mod_name, mod_hash = conf["dependencies"][mod].split('=')
+            modules.append(mod_name)
+            mod_name = mod_name.split('@')[0]
+            hashes[mod_name] = mod_hash
+            print(mod_name, mod_hash)
+
 
     for module in modules:
         print('Installing', module+"...")
@@ -178,7 +206,9 @@ def installOpt(args: Namespace):
         if '@' in module:
             repo, tag = module.split('@')
         module_name = repo.split('/')[-1]
-
+    
+        if tag == 'None':
+            tag = None
 
         git_url = f"https://github.com/{repo}.git"
         tags = getRepoTagHashes(git_url)
@@ -189,8 +219,15 @@ def installOpt(args: Namespace):
         else:
             hash = getRepoHeadHash(git_url)
         print(tag, hash)
-
-        Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag,
+        
+        if len(hashes.keys()) > 0:
+            try:
+                r = Repo.clone_from(git_url, to_path='./.amor/tmp/')
+                r.index.reset(commit=hashes[repo], working_tree=True)
+            except KeyError:
+                print('Something went wrong resetting the HEAD!')
+        else:
+            Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag,
                         depth=1)
         
         dir_content = listdir('./.amor/tmp')
@@ -260,7 +297,7 @@ def installOpt(args: Namespace):
         if conf['dependencies'] is None:
             conf['dependencies'] = {}
 
-        conf['dependencies'][module_name] = f"{module_name}:{repo}@{tag}={hash}"
+        conf['dependencies'][module_name] = f"{repo}@{tag}={hash}"
 
         with open('amor.toml', 'w') as amor_conf:
             dump(conf, amor_conf)
@@ -363,7 +400,9 @@ init.set_defaults(func=initOpt)
 # Install
 install = subparsers.add_parser("install", aliases=["i", "add"], help="Install\
         the given module to this project.")
-install.add_argument("module", nargs="+", type=str, help="Modules to install\
+install.add_argument('--force', '-f', action="store_true", help="Force the\
+        force the re-installation of all modules.")
+install.add_argument("module", nargs="*", type=str, help="Modules to install\
                      from Github. Given in format\
                      `<username>/<repository>[@<tag>]`. If <tag> is not present\
                      the most current version will be installed. If <tag> is\
