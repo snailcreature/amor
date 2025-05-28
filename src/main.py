@@ -4,7 +4,7 @@ from toml import load, dump
 from os import mkdir, path, getcwd, environ, listdir, rename
 from shutil import ignore_patterns, rmtree, copytree
 from subprocess import PIPE, run as cmd
-from luaparser import ast
+from luaparser import ast, astnodes
 from git import Repo
 from lupa.lua54 import LuaRuntime
 
@@ -251,7 +251,7 @@ def installOpt(args: Namespace):
                     )                                                                          
             build_modules = lua.execute(''.join(rspec))
 
-            mods = [mod for mod in build_modules.keys()]
+            mods = [mod for mod in build_modules.keys()] # type: ignore
 
             if len(mods) > 0:
                 module_name = mods[0]
@@ -279,6 +279,10 @@ def installOpt(args: Namespace):
             print(LUA_INCLUDE)
             res = cmd(["make", f"--include-dir={LUA_INCLUDE}"], stdout=PIPE,
                       shell=True, text=True, cwd='./.amor/tmp/')
+            
+            for line in res.stdout.splitlines(): print(line)
+
+            res.check_returncode()
 
         else:
             print('No build option found! Copying files...')
@@ -364,19 +368,34 @@ def buildOpt(args: Namespace):
     with open('./'+source_dir+'/'+entry, 'r') as lua_file:
         lua_code = ''.join(lua_file.readlines())
 
+    path = lua.eval('package.path')
+    cpath = lua.eval('package.cpath')
+    lua_path = str(path) + f';./.amor/?.lua;./{source_dir}/?.lua;'
+    lua_cpath = str(cpath) + f';./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so'
     lua_ast = ast.parse(lua_code)
 
-    ast.to_pretty_str(lua_ast)
+    mod_map: dict[str, str] = {}
 
-    print(ast.to_lua_source(lua_ast))
+    for node in ast.walk(lua_ast): # type: ignore
+        if isinstance(node, astnodes.Call):
+            node: astnodes.Call = node
+            if isinstance(node.func, astnodes.Name):
+                func: astnodes.Name = node.func # type: ignore
 
-    path = lua.eval('package.path')
-    print("\nPath:", path)
+                if func.id == 'require':
+                    mod: astnodes.String = node.args[0] # type: ignore
 
-    cpath = lua.eval('package.cpath')
-    print("\nCPath:", cpath)
+                    res = lua.eval(f'package.searchpath("{mod.s}",\
+                                "{lua_path+lua_cpath}")')
+                    if '(None,' in str(res):
+                        print(f'Could not Rind {mod.s}')
+                        continue
 
-    print("\nCWD:", getcwd())
+                    mod_map[mod.s] = str(res)
+                    
+    for key in mod_map.keys(): print(key, mod_map[key])
+    
+    print('\n'+ast.to_lua_source(lua_ast))
 
     return
 
@@ -400,6 +419,8 @@ def loveOpt(_args: Namespace):
     return
     
 
+
+# Parser
 parser = ArgumentParser(description="A package manager for the Löve game engine.")
 
 subparsers = parser.add_subparsers(help="Additional commands")

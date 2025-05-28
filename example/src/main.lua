@@ -1,3 +1,4 @@
-modA = require "lib.moduleA"
+local modA = require "lib.moduleA"
+require "lfs"
 
 modA.hello()
