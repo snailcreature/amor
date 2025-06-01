@@ -6,12 +6,22 @@ from shutil import copyfile, rmtree, copytree
 from subprocess import PIPE, run as cmd
 from luaparser import ast, astnodes
 from git import Repo
-from lupa.lua54 import LuaRuntime
 from pickle import load as pload, dump as pdump
 from fnmatch import filter as fil, fnmatch
+try:
+    from lupa.lua54 import LuaRuntime
+except ImportError:
+    try:
+        from lupa.lua53 import LuaRuntime
+    except ImportError:
+        try:
+            from lupa.lua52 import LuaRuntime
+        except ImportError:
+            from lupa.lua51 import LuaRuntime
 
-lua = LuaRuntime()
 
+
+# Default configuration
 default_conf = {
             "project": {
                 "name": "",
@@ -37,12 +47,14 @@ default_conf = {
             "dependencies": {},
             }
 
-gitignore_lines = [
-        "/build\n",
-        "/dist\n",
-        "/.amor\n"
-        ]
+# Default .gitignore for projects
+gitignore_lines = """\
+/build
+/dist
+/.amor
+""".splitlines(keepends=True)
 
+# Default .gitattributes for projects
 gitattributes_lines = """\
 # Normalise line endings
 * text=auto
@@ -55,6 +67,7 @@ gitattributes_lines = """\
 
 """.splitlines(keepends=True)
 
+# Basic Love2D entry file
 main_lua_content = """\
 function love.load(arg)
 end
@@ -66,6 +79,7 @@ function love.draw()
 end
 """.splitlines(keepends=True)
 
+# Template for init.lua for C modules
 init_lua_template = """\
 local Path = (...):gsub("%p", "/")
 local RequirePath = ...
@@ -76,6 +90,9 @@ return {mod}
 
 
 def getRepoTags(repo_url: str):
+    """
+    Get the tags of a remote repository.
+    """
     res = cmd(["git", "ls-remote", "--tags", repo_url], stdout=PIPE, text=True)
 
     out_lines = res.stdout.splitlines()
@@ -88,6 +105,9 @@ def getRepoTags(repo_url: str):
 
 
 def getRepoTagHashes(repo_url: str):
+    """
+    Get the hashes for the tagged releases of a remote repository.
+    """
     res = cmd(["git", "ls-remote", "--tags", repo_url], stdout=PIPE, text=True)
 
     out_lines = res.stdout.splitlines()
@@ -103,7 +123,11 @@ def getRepoTagHashes(repo_url: str):
 
     return tagHashes
 
+
 def getRepoHeads(repo_url: str):
+    """
+    Get the HEAD commits of a remote repository.
+    """
     res = cmd(['git', 'ls-remote', '--heads', repo_url], stdout=PIPE, text=True)
 
     out_lines = res.stdout.splitlines()
@@ -119,6 +143,9 @@ def getRepoHeads(repo_url: str):
 
 
 def getRepoHeadHash(repo_url: str):
+    """
+    Get the hash for the HEAD commit of a remote repository.
+    """
     res = cmd(['git', 'ls-remote', repo_url, 'HEAD'], shell=False, stdout=PIPE,
             text=True)
      
@@ -132,6 +159,9 @@ def getRepoHeadHash(repo_url: str):
 
 
 def newOpt(args: Namespace):
+    """
+    Create a new repository from scratch.
+    """
     name = args.name[0]
      
     if name == '.':
@@ -174,6 +204,9 @@ def newOpt(args: Namespace):
 
 
 def initOpt(args: Namespace):
+    """
+    Initialise amor in the current repository.
+    """
     with open('amor.toml', 'r') as conf:
         amor_conf: dict = load(conf)
 
@@ -213,6 +246,9 @@ def initOpt(args: Namespace):
 
 
 def include_patterns(*patterns):
+    """
+    Define the patterns to include in the tree when using shutil.copytree().
+    """
     def _ignore_patterns(p: Any, names: list[str]):
         keep = set(name for pattern in patterns
                    for name in fil(names, pattern))
@@ -225,6 +261,9 @@ def include_patterns(*patterns):
 
 
 def installOpt(args: Namespace):
+    """
+    Install given repositor(y/ies) or all repositories in the project amor.toml.
+    """
     modules: list[str] = args.module
     
     hashes = {}
@@ -306,7 +345,8 @@ def installOpt(args: Namespace):
 
             rspec.append(
                     "if build and build.modules then return build.modules end\n"
-                    )                                                                          
+                    )
+            lua = LuaRuntime()
             build_modules = lua.execute(''.join(rspec))
 
             mods = [mod for mod in build_modules.keys()] # type: ignore
@@ -369,6 +409,9 @@ def installOpt(args: Namespace):
 
 
 def uninstallOpt(args: Namespace):
+    """
+    Uninstall the given repositor(y/ies).
+    """
     modules: list[str] = args.module
 
     with open('amor.toml', 'r') as amor_conf:
@@ -394,6 +437,9 @@ def uninstallOpt(args: Namespace):
 
 
 def runOpt(args: Namespace):
+    """
+    Run a given script name from the project amor.toml.
+    """
     script = args.script[0]
     with open('amor.toml', 'r') as conf:
         amor_conf: dict = load(conf)
@@ -417,6 +463,9 @@ def runOpt(args: Namespace):
 
 
 def buildOpt(args: Namespace):
+    """
+    Build the project.
+    """
     with open('amor.toml', 'r') as conf_file:
         conf = load(conf_file)
 
@@ -424,7 +473,8 @@ def buildOpt(args: Namespace):
     build_dir = conf["project"]["build_dir"]
     entry = conf["project"]["entry"]
     include = conf["build"]["include"]
-    exclude = conf["build"]["exclude"]
+
+    lua = LuaRuntime()
 
     lpath = lua.eval('package.path')
     cpath = lua.eval('package.cpath')
@@ -436,6 +486,9 @@ def buildOpt(args: Namespace):
 
 
     def recScanSource(file_path: str, mod_map: dict[str, str]) -> dict[str, str]:
+        """
+        Scan the project source for required modules.
+        """
         with open(file_path, 'r') as src_file:
             lua_code = ''.join(src_file.readlines())
 
@@ -505,6 +558,9 @@ def buildOpt(args: Namespace):
 
     
     def recCompile(directory: str):
+        """
+        Compile the project source directory.
+        """
         dir_list = listdir(directory)
 
         for dir in dir_list:
@@ -536,9 +592,15 @@ def buildOpt(args: Namespace):
                     out.write(comped)
                 print('Built', comp_path)
         return
+
+
     recCompile('./.bld')
 
     def recRegisterAssets(dir: str, asset_dict = {}):
+        """
+        Register assets in the project source based on the build.include pattern
+        list.
+        """
         print(f'Checking {dir}...')
         directory = listdir(dir)
         
@@ -560,6 +622,9 @@ def buildOpt(args: Namespace):
     
 
     def recCopyAssets(dir: str, asset_dict: dict):
+        """
+        Recursively copy assets based on the output of recRegisterAssets.
+        """
         if not path.exists(f"./{build_dir}/{dir}"):
             mkdir(f"./{build_dir}/{dir}")
         
@@ -585,6 +650,9 @@ def buildOpt(args: Namespace):
 
 
 def loveOpt(_args: Namespace):
+    """
+    Run Löve2D on the project build directory.
+    """
     with open('amor.toml', 'r') as conf:
         amor_conf = load(conf)
 
