@@ -1,0 +1,3 @@
+#!/bin/bash
+
+pyinstaller src/main.py --clean -n amor

@@ -2,13 +2,13 @@ from argparse import ArgumentParser, Namespace
 from typing import Any
 from toml import load, dump
 from os import mkdir, path, getcwd, environ, listdir
-from shutil import rmtree, copytree
+from shutil import copyfile, rmtree, copytree
 from subprocess import PIPE, run as cmd
 from luaparser import ast, astnodes
 from git import Repo
 from lupa.lua54 import LuaRuntime
 from pickle import load as pload, dump as pdump
-from fnmatch import filter as fil
+from fnmatch import filter as fil, fnmatch
 
 lua = LuaRuntime()
 
@@ -25,12 +25,17 @@ default_conf = {
                 "build_dir": "build",
                 "entry": "main.lua",
                 },
+            "build": {
+                "include": [
+                    "*.png",
+                    ],
+                "exclude": [],
+                },
             "scripts": {
                 "test": "echo \"Hello, World!\"",
                 "build": "echo \"No build script defined!\"",
                 },
             "dependencies": {},
-            "dev_dependencies": {},
             }
 
 gitignore_lines = [
@@ -39,7 +44,19 @@ gitignore_lines = [
         "/.amor\n"
         ]
 
-main_lua_content = """
+gitattributes_lines = """\
+# Normalise line endings
+* text=auto
+
+# Enforce Unix line endings
+* text eol=lf
+
+# Treat these as binaries
+*.png binary
+
+""".splitlines(keepends=True)
+
+main_lua_content = """\
 function love.load(arg)
 end
 
@@ -50,7 +67,7 @@ function love.draw()
 end
 """.splitlines(keepends=True)
 
-init_lua_template = """
+init_lua_template = """\
 local Path = (...):gsub("%p", "/")
 local RequirePath = ...
 local {mod} = package.loadlib("{mod}", Path.."/{mod}.so")
@@ -142,10 +159,14 @@ def newOpt(args: Namespace):
         with open("./"+name+"/.gitignore", 'w') as gitignore:
             gitignore.writelines(gitignore_lines)
 
+        with open("./"+name+"/.gitattributes", 'w') as gitattributes:
+            gitattributes.writelines(gitattributes_lines)
+
         print("Initialising git repo...")
         repo = Repo.init(path.join(name))
         repo.index.add([".gitignore",
-            "amor.toml"
+                ".gitattributes",
+                "amor.toml"
             ])
         repo.index.commit("Initial commit")
     
@@ -176,9 +197,13 @@ def initOpt(args: Namespace):
         with open(".gitignore", 'w') as gitignore:
             gitignore.writelines(gitignore_lines)
 
+        with open(".gitattributes", "w") as gitattributes:
+            gitattributes.writelines(gitattributes_lines)
+
         print("Initialising git repo...")
         repo = Repo.init('.')
         repo.index.add([
+            ".gitattributes",
             ".gitignore",
             "amor.toml"
             ])
@@ -399,6 +424,8 @@ def buildOpt(args: Namespace):
     source_dir = conf["project"]["source_dir"]
     build_dir = conf["project"]["build_dir"]
     entry = conf["project"]["entry"]
+    include = conf["build"]["include"]
+    exclude = conf["build"]["exclude"]
 
     lpath = lua.eval('package.path')
     cpath = lua.eval('package.cpath')
@@ -511,7 +538,50 @@ def buildOpt(args: Namespace):
                 print('Built', comp_path)
         return
     recCompile('./.bld')
+
+    def recRegisterAssets(dir: str, asset_dict = {}):
+        print(f'Checking {dir}...')
+        directory = listdir(dir)
+        
+        for p in directory:
+            if path.isdir(f"{dir}/{p}"):
+                asset_dict[p] = recRegisterAssets(f"{dir}/{p}", {})
+            else:
+                for pattern in include:
+                    if fnmatch(p, pattern):
+                        print(f"Found {dir}/{p}")
+                        asset_dict[p] = True
+                        break
+
+        for key in asset_dict.copy().keys():
+            if type(asset_dict[key]) is dict and len(asset_dict[key].keys()) == 0:
+                del asset_dict[key]
+
+        return asset_dict
     
+
+    def recCopyAssets(dir: str, asset_dict: dict):
+        if not path.exists(f"./{build_dir}/{dir}"):
+            mkdir(f"./{build_dir}/{dir}")
+        
+        for key in asset_dict.keys():
+            if type(asset_dict[key]) == dict:
+                recCopyAssets(f"{dir}/{key}", asset_dict[key])
+            else:
+                print(f"Copying ./{source_dir}/{dir}/{key}...")
+                copyfile(f"./{source_dir}/{dir}/{key}",
+                         f"./{build_dir}/{dir}/{key}")
+        return
+
+
+    print(include)
+    assets = recRegisterAssets(f"./{source_dir}")
+    if len(assets.keys()) > 0:
+        print("Found assets")
+        print(assets)
+        recCopyAssets("", assets)
+    else:
+        print("No assets found")
     return
 
 

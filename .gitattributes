@@ -3,3 +3,7 @@
 
 # Enforce Unix line endings
 * text eol=lf
+
+# Treat these as binaries
+*.png binary
+

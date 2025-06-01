@@ -3,3 +3,4 @@ GitPython
 luaparser
 lupa
 types-lupa
+pyinstaller
