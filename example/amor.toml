@@ -12,7 +12,6 @@ entry = "main.lua"
 
 [build]
 include = [ "*.png",]
-exclude = []
 
 [scripts]
 test = "echo \"Hello, World!\""

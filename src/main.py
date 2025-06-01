@@ -29,7 +29,6 @@ default_conf = {
                 "include": [
                     "*.png",
                     ],
-                "exclude": [],
                 },
             "scripts": {
                 "test": "echo \"Hello, World!\"",
