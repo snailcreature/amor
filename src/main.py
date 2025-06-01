@@ -1,12 +1,14 @@
 from argparse import ArgumentParser, Namespace
+from typing import Any
 from toml import load, dump
 from os import mkdir, path, getcwd, environ, listdir
-from shutil import ignore_patterns, rmtree, copytree
+from shutil import rmtree, copytree
 from subprocess import PIPE, run as cmd
 from luaparser import ast, astnodes
 from git import Repo
 from lupa.lua54 import LuaRuntime
 from pickle import load as pload, dump as pdump
+from fnmatch import filter as fil
 
 lua = LuaRuntime()
 
@@ -36,6 +38,25 @@ gitignore_lines = [
         "/dist\n",
         "/.amor\n"
         ]
+
+main_lua_content = """
+function love.load(arg)
+end
+
+function love.update(dt)
+end
+
+function love.draw()
+end
+""".splitlines(keepends=True)
+
+init_lua_template = """
+local Path = (...):gsub("%p", "/")
+local RequirePath = ...
+local {mod} = package.loadlib("{mod}", Path.."/{mod}.so")
+package.loaded["{mod}"] = {mod}
+return {mod}
+"""
 
 
 def getRepoTags(repo_url: str):
@@ -109,6 +130,8 @@ def newOpt(args: Namespace):
     print("Making directory ./"+name+"...")
     mkdir('./'+name)
     mkdir('./'+name+'/src')
+    with open('./'+name+'/src/main.lua') as main_lua:
+        main_lua.writelines(main_lua_content)
 
     print("Creating ./"+name+"/amor.conf...")
     with open('./'+name+'/amor.toml', 'w') as conf_file:
@@ -163,6 +186,18 @@ def initOpt(args: Namespace):
     print("Project initialised!")
 
     return
+
+
+def include_patterns(*patterns):
+    def _ignore_patterns(p: Any, names: list[str]):
+        keep = set(name for pattern in patterns
+                   for name in fil(names, pattern))
+
+        ignore = set(name for name in names
+                     if name not in keep and not path.isdir(path.join(p,
+                                                                      name)))
+        return ignore
+    return _ignore_patterns
 
 
 def installOpt(args: Namespace):
@@ -290,7 +325,7 @@ def installOpt(args: Namespace):
                 rmtree(f"./.amor/{module_name}")
 
             copytree("./.amor/tmp", f"./.amor/{module_name}",
-                     ignore=ignore_patterns("*.git*", "*.md"))
+                     ignore=include_patterns("*.lua", "*.so"))
         
         rmtree('./.amor/tmp')
 
@@ -373,6 +408,7 @@ def buildOpt(args: Namespace):
     if not path.exists('./.bld'):
         mkdir('./.bld')
 
+
     def recScanSource(file_path: str, mod_map: dict[str, str]) -> dict[str, str]:
         with open(file_path, 'r') as src_file:
             lua_code = ''.join(src_file.readlines())
@@ -424,18 +460,22 @@ def buildOpt(args: Namespace):
     if not path.exists(f"./{build_dir}"):
         mkdir(f"./{build_dir}")
 
-    if not path.exists(f"./{build_dir}/_ext"):
-        mkdir(f"./{build_dir}/_ext")
+    if not path.exists(f"./{build_dir}/ext"):
+        mkdir(f"./{build_dir}/ext")
 
     for key in mod_map.keys():
         if not f"./{source_dir}/" in mod_map[key]:
             copy_path = mod_map[key].split('/')[:-1]
             mod_dir = copy_path[-1]
-            out_dir = f"./{build_dir}/_ext/{mod_dir}"
+            out_dir = f"./{build_dir}/ext/{mod_dir}"
             if path.exists(out_dir):
                 rmtree(out_dir)
-            copytree('/'.join(copy_path), f"./{build_dir}/_ext/{mod_dir}")
+            copytree('/'.join(copy_path), f"./{build_dir}/ext/{mod_dir}")
             print("Copied", mod_map[key])
+            if mod_map[key].endswith('.so'):
+                init_lua_content = init_lua_template.replace("{mod}", key)
+                with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
+                    init_file.writelines(init_lua_content.splitlines(keepends=True))
 
     
     def recCompile(directory: str):
@@ -453,9 +493,9 @@ def buildOpt(args: Namespace):
 
                 for mod in mod_map.keys():
                     if not f"./{source_dir}/" in mod_map[mod]:
-                        comped = comped.replace(f"require(\"{mod}", f"require(\"_ext.{mod}")
+                        comped = comped.replace(f"require(\"{mod}", f"require(\"ext.{mod}")
                         comped = comped.replace(f"require('{mod}",
-                                                          f"require('_ext.{mod}")
+                                                          f"require('ext.{mod}")
 
                 out_dir = full_path.split('/')
                 comp_path = '/'.join([f'./{build_dir}'] +
@@ -482,9 +522,9 @@ def loveOpt(_args: Namespace):
     build_dir = amor_conf["project"]["build_dir"]
     cwd = getcwd()
     lua_env = environ.copy()
-    lua_env["LUA_PATH"] = f"{cwd}/.amor/?/init.lua;{cwd}/.amor/?.lua;\
+    lua_env["LUA_PATH"] = f"?;?.lua;{cwd}/{build_dir}/?/init.lua;{cwd}/{build_dir}/?.lua;\
             {lua_env['LUA_PATH']}"
-    lua_env["LUA_CPATH"] = f"{cwd}/.amor/?.so;{cwd}/.amor/?/?.so;{lua_env['LUA_CPATH']}"
+    lua_env["LUA_CPATH"] = f"?;?.so;{cwd}/{build_dir}/?.so;{cwd}/{build_dir}/?/?.so;{lua_env['LUA_CPATH']}"
         
     res = cmd(["love", build_dir], stdout=PIPE, text=True, env=lua_env)
 
