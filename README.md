@@ -1,0 +1,49 @@
+# amor: A Löve2D project manager
+
+As a package and project manager, amor can:
+
+- Create a new Löve project
+- Initialise in an existing Löve project
+- Install and build modules from GitHub
+- Track your installed modules for project set up and recovery
+- Build your project into a single directory including:
+    - Your source files
+    - Assets you have flagged
+    - External modules you have installed
+- Run custom scripts
+
+## About
+
+Written in Python, amor aims to provide a lightweight solution to
+the issue of creating, managing, and building Löve projects. It uses
+GitPython to install modules, and a combination of luaparser and lupa to
+build the final project. A toml configuration file is used for easy management
+of project settings and dependencies.
+
+amor requires git, luarocks, and some version of gnu-make be installed, along
+with Lua (5.4 preferred).
+
+## Usage
+
+Clone this repository then run
+
+```shell
+pip install -r requirements.txt
+chmod +x ./build_me
+./build_me
+```
+
+This will create the standalone executable version of amor. Add the path
+to your system PATH to be able to run it from anywhere on your system.
+
+Open a terminal in your development folder and run
+
+```shell
+amor new my_project -g
+```
+
+This will create a new project in the folder `my_project` with git initialised,
+along with a default amor.toml and `src` directory with a `main.lua`
+pre-configured with the core Löve functions (load, update, and draw).
+
+Run `amor -h` for a full list of commands and how to use them.
