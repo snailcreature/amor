@@ -1,4 +1,4 @@
-# amor: A Löve2D project manager
+# amor: A Löve2D project manager :heart:
 
 As a package and project manager, amor can:
 
@@ -20,8 +20,9 @@ GitPython to install modules, and a combination of luaparser and lupa to
 build the final project. A toml configuration file is used for easy management
 of project settings and dependencies.
 
-amor requires git, luarocks, and some version of gnu-make be installed, along
-with Lua (5.4 preferred).
+amor requires [git](https://git-scm.com/downloads), [luarocks](https://luarocks.org/),
+and some version of gnu-make be installed, along with Lua (5.4 preferred). 
+[Löve](https://love2d.org/) is also required.
 
 ## Usage
 
@@ -47,3 +48,7 @@ along with a default amor.toml and `src` directory with a `main.lua`
 pre-configured with the core Löve functions (load, update, and draw).
 
 Run `amor -h` for a full list of commands and how to use them.
+
+## Credits
+
+Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
