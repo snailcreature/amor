@@ -55,4 +55,4 @@ Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
 
 ## Roadmap
 
--[ ] Incremental builds
+- [ ] Incremental builds
