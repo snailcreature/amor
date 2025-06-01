@@ -52,3 +52,7 @@ Run `amor -h` for a full list of commands and how to use them.
 ## Credits
 
 Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
+
+## Roadmap
+
+-[ ] Incremental builds
