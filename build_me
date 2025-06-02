@@ -24,6 +24,14 @@ else
     printf '\n\e[1;92m%-6s\e[m\n\n' "Git found!"
 fi
 
+if ! lua_loc="$(type -p "lua")" || [[-z $lua_loc]]; then
+    printf '\n\e[1;33m%-6s\e[m\n' "Lua not installed!"
+    printf "\nVisit \e]8;;https://www.lua.org/download.html\e\\https://www.lua.org/download.html\e]8;;\e\\ to get started.\n"
+    exit 1
+else
+    printf "\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n\n" "Lua found!"
+fi
+
 if ! love_loc="$(type -p "love")" || [[-z $love_loc]]; then
     printf '\n\e[1;33m%-6s\e[m\n' "Löve2D not installed!"
     printf "\nVisit \e]8;;https://love2d.org/\e\\https://love2d.org/\e]8;;\e\\ to get started.\n"
