@@ -24,18 +24,19 @@ amor requires [git](https://git-scm.com/downloads), [luarocks](https://luarocks.
 and some version of gnu-make be installed, along with Lua (5.4 preferred). 
 [Löve](https://love2d.org/) is also required.
 
-## Usage
+## Setup
 
 Clone this repository then run
 
 ```shell
-pip install -r requirements.txt
 chmod +x ./build_me
 ./build_me
 ```
 
 This will create the standalone executable version of amor. Add the path
 to your system PATH to be able to run it from anywhere on your system.
+
+## Usage
 
 Open a terminal in your development folder and run
 
@@ -44,7 +45,7 @@ amor new my_project -g
 ```
 
 This will create a new project in the folder `my_project` with git initialised,
-along with a default amor.toml and `src` directory with a `main.lua`
+along with a default `amor.toml` and `src` directory with a `main.lua`
 pre-configured with the core Löve functions (load, update, and draw).
 
 Run `amor -h` for a full list of commands and how to use them.
