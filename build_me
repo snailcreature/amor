@@ -24,11 +24,23 @@ else
     printf '\n\e[1;92m%-6s\e[m\n\n' "Git found!"
 fi
 
+if ! love_loc="$(type -p "love")" || [[-z $love_loc]]; then
+    printf '\n\e[1;33m%-6s\e[m\n' "Löve2D not installed!"
+    printf "\nVisit \e]8;;https://love2d.org/\e\\https://love2d.org/\e]8;;\e\\ to get started.\n"
+    printf "\n\e[1;93m%-6s\e[m\n" "Löve is not required, but it certainly helps ;)"
+else
+    printf "\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n\n" "Löve2D found!"
+fi
+
 python3 -m pip install -r requirements.txt
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "building amor..."
 
-pyinstaller src/main.py --clean -n amor
+if ! pyinstaller src/main.py --clean -n amor; then
+    printf "\n\e[1;91mSomething went wrong!\e[m\n"
+    printf "\n\e[93mIf you did not trigger this, check the logs. Otherwise, try again when ready.\e[m\n\n"
+    exit 1
+fi
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "amor built!"
 printf '\n\e[93m%-6s\e[m\n' "Add the following path to your system PATH:"
