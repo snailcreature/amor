@@ -24,6 +24,9 @@ amor requires [git](https://git-scm.com/downloads), [luarocks](https://luarocks.
 and some version of gnu-make be installed, along with Lua (5.4 preferred). 
 [Löve](https://love2d.org/) is also required.
 
+This is a hobby project that is maintained by an individual. Please submit any
+bugs you find as Issues. Check [the Changelog](/CHANGELOG.md) before updating.
+
 ## Setup
 
 Clone this repository then run
@@ -50,6 +53,18 @@ pre-configured with the core Löve functions (load, update, and draw).
 
 Run `amor -h` for a full list of commands and how to use them.
 
+## Updating
+
+Go to your cloned version of this project and run
+
+```shell
+git pull
+./build_me
+```
+
+Please check [the Changelog](/CHANGELOG.md) for breaking changes before
+updating.
+
 ## Credits
 
 Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
@@ -57,3 +72,5 @@ Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
 ## Roadmap
 
 - [ ] Incremental builds
+- [ ] Dev dependencies
+- [ ] Dependency execution
