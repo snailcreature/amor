@@ -32,8 +32,12 @@ bugs you find as Issues. Check [the Changelog](/CHANGELOG.md) before updating.
 Clone this repository then run
 
 ```shell
-chmod +x ./build_me
-./build_me
+bash setup
+
+# Or
+
+chmod +x ./setup
+./setup
 ```
 
 This will create the standalone executable version of amor. Add the path
@@ -59,7 +63,7 @@ Go to your cloned version of this project and run
 
 ```shell
 git pull
-./build_me
+./setup
 ```
 
 Please check [the Changelog](/CHANGELOG.md) for breaking changes before
