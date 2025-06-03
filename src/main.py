@@ -19,7 +19,10 @@ except ImportError:
         except ImportError:
             from lupa.lua51 import LuaRuntime
 
-
+# amor version
+__version__ = '0.1.0'
+__author__ = 'Sam Drage (github: snailcreature)'
+__date__ = '2025-06-03'
 
 # Default configuration
 default_conf = {
@@ -671,9 +674,19 @@ def loveOpt(_args: Namespace):
     return
     
 
+def defaultOpt(args: Namespace):
+    if args.version:
+        print(f"amor {__version__}")
+    return
+
 
 # Parser
-parser = ArgumentParser(description="A package manager for the Löve game engine.")
+parser = ArgumentParser(description="A package manager for the Löve game\
+                        engine.")
+
+parser.add_argument('--version', '-v', action="store_true", help="Show the\
+        installed amor version.")
+parser.set_defaults(func=defaultOpt)
 
 subparsers = parser.add_subparsers(help="Additional commands")
 
