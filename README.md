@@ -63,7 +63,7 @@ Go to your cloned version of this project and run
 
 ```shell
 git pull
-./setup
+bash setup # or "./setup", if you ran "chmod +x ./setup" before
 ```
 
 Please check [the Changelog](/CHANGELOG.md) for breaking changes before
