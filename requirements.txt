@@ -1,6 +1,6 @@
-toml
-GitPython
-luaparser
-lupa
-types-lupa
-pyinstaller
+toml >= 0.10.2, == 0.10.*
+GitPython >= 3.1.44, == 3.1.*
+luaparser >= 3.3.0, == 3.3.*
+lupa >= 2.4.0, == 2.4.*
+types-lupa >= 2.4.0, == 2.4.*
+pyinstaller >= 6.13.0, == 6.13.*

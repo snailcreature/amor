@@ -15,10 +15,12 @@ As a package and project manager, amor can:
 ## About
 
 Written in Python, amor aims to provide a lightweight solution to
-the issue of creating, managing, and building Löve projects. It uses
-GitPython to install modules, and a combination of luaparser and lupa to
-build the final project. A toml configuration file is used for easy management
-of project settings and dependencies.
+the issue of creating, managing, and building [Löve](https://love2d.org/)
+projects. It uses [GitPython](https://gitpython.readthedocs.io/en/stable/) to
+install modules, and a combination of [luaparser](https://pypi.org/project/luaparser/)
+and [lupa](https://pypi.org/project/lupa/) to build the final project. A toml
+configuration file is used for easy management of project settings and
+dependencies.
 
 amor requires [git](https://git-scm.com/downloads), [luarocks](https://luarocks.org/),
 and some version of gnu-make be installed, along with Lua (5.4 preferred). 
@@ -33,9 +35,11 @@ Clone this repository then run
 
 ```shell
 bash setup
+```
 
-# Or
+or,
 
+```shell
 chmod +x ./setup
 ./setup
 ```
