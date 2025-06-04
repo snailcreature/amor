@@ -44,8 +44,9 @@ chmod +x ./setup
 ./setup
 ```
 
-This will create the standalone executable version of amor. Add the path
-to your system PATH to be able to run it from anywhere on your system.
+This will create the standalone executable version of amor. Add the paths
+provided by the setup script to your system PATH to be able to run it from
+anywhere on your system.
 
 ## Usage
 
