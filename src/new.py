@@ -23,7 +23,7 @@ def newOpt(args: Namespace):
     print("Making directory ./"+name+"...")
     mkdir('./'+name)
     mkdir('./'+name+'/src')
-    with open('./'+name+'/src/main.lua') as main_lua:
+    with open('./'+name+'/src/main.lua', 'w') as main_lua:
         main_lua.writelines(main_lua_content)
 
     print("Creating ./"+name+"/amor.conf...")
