@@ -1,13 +1,14 @@
 from argparse import Namespace
-from toml import load, dump
-from git import Repo
-
-from constants import default_conf, gitignore_lines, gitattributes_lines
 
 def initOpt(args: Namespace):
     """
     Initialise amor in the current repository.
     """
+    from toml import load, dump
+    from git import Repo
+
+    from constants import default_conf, gitignore_lines, gitattributes_lines
+    
     with open('amor.toml', 'r') as conf:
         amor_conf: dict = load(conf)
 

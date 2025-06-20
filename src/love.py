@@ -1,12 +1,13 @@
 from argparse import Namespace
-from toml import load
-from os import getcwd, environ
-from subprocess import PIPE, run as cmd
 
 def loveOpt(_args: Namespace):
     """
     Run Löve2D on the project build directory.
     """
+    from toml import load
+    from os import getcwd, environ
+    from subprocess import PIPE, run as cmd
+    
     with open('amor.toml', 'r') as conf:
         amor_conf = load(conf)
 

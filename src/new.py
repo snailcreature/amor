@@ -1,14 +1,15 @@
 from argparse import Namespace
-from os import mkdir, path
-from toml import dump
-from git import Repo
-
-from constants import default_conf, main_lua_content, gitignore_lines, gitattributes_lines
 
 def newOpt(args: Namespace):
     """
     Create a new repository from scratch.
     """
+    from os import mkdir, path
+    from toml import dump
+    from git import Repo
+
+    from constants import default_conf, main_lua_content, gitignore_lines, gitattributes_lines
+    
     name = args.name[0]
      
     if name == '.':

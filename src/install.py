@@ -1,27 +1,27 @@
 from argparse import Namespace
-from os import listdir, path, getcwd, environ
-from shutil import rmtree, copytree
-from toml import load, dump
-from git import Repo
-from subprocess import PIPE, run as cmd
-try:
-    from lupa.lua54 import LuaRuntime
-except ImportError:
-    try:
-        from lupa.lua53 import LuaRuntime
-    except ImportError:
-        try:
-            from lupa.lua52 import LuaRuntime
-        except ImportError:
-            from lupa.lua51 import LuaRuntime
-
-
-from utils import getRepoHeadHash, getRepoTagHashes, include_patterns
 
 def installOpt(args: Namespace):
     """
     Install given repositor(y/ies) or all repositories in the project amor.toml.
     """
+    from os import listdir, path, getcwd, environ
+    from shutil import rmtree, copytree
+    from toml import load, dump
+    from git import Repo
+    from subprocess import PIPE, run as cmd
+    try:
+        from lupa.lua54 import LuaRuntime
+    except ImportError:
+        try:
+            from lupa.lua53 import LuaRuntime
+        except ImportError:
+            try:
+                from lupa.lua52 import LuaRuntime
+            except ImportError:
+                from lupa.lua51 import LuaRuntime
+
+
+    from utils import getRepoHeadHash, getRepoTagHashes, include_patterns
 
     modules: list[str] = args.module
     

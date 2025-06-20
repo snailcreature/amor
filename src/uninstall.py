@@ -1,11 +1,12 @@
 from argparse import Namespace
-from toml import load, dump
-from shutil import rmtree
 
 def uninstallOpt(args: Namespace):
     """
     Uninstall the given repositor(y/ies).
     """
+    from toml import load, dump
+    from shutil import rmtree
+    
     modules: list[str] = args.module
 
     with open('amor.toml', 'r') as amor_conf:

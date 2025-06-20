@@ -1,27 +1,27 @@
 from argparse import Namespace
-from toml import load
-from os import path, mkdir, listdir
-from luaparser import ast, astnodes
-from pickle import load as pload, dump as pdump
-from shutil import rmtree, copytree, copyfile
-from fnmatch import filter as fnmatch
-try:
-    from lupa.lua54 import LuaRuntime
-except ImportError:
-    try:
-        from lupa.lua53 import LuaRuntime
-    except ImportError:
-        try:
-            from lupa.lua52 import LuaRuntime
-        except ImportError:
-            from lupa.lua51 import LuaRuntime
-
-from constants import init_lua_template
 
 def buildOpt(args: Namespace):
     """
     Build the project.
     """
+    from toml import load
+    from os import path, mkdir, listdir
+    from luaparser import ast, astnodes
+    from pickle import load as pload, dump as pdump
+    from shutil import rmtree, copytree, copyfile
+    from fnmatch import filter as fnmatch
+    try:
+        from lupa.lua54 import LuaRuntime
+    except ImportError:
+        try:
+            from lupa.lua53 import LuaRuntime
+        except ImportError:
+            try:
+                from lupa.lua52 import LuaRuntime
+            except ImportError:
+                from lupa.lua51 import LuaRuntime
+
+    from constants import init_lua_template
 
     with open('amor.toml', 'r') as conf_file:
         conf = load(conf_file)
