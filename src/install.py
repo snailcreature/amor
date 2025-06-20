@@ -61,7 +61,7 @@ def installOpt(args: Namespace):
         repo = module
         if '@' in module:
             repo, tag = module.split('@')
-        module_name = repo.split('/')[-1]
+        mod_name = repo.split('/')[-1]
     
         if tag == 'None':
             tag = None
@@ -89,66 +89,85 @@ def installOpt(args: Namespace):
         dir_content = listdir('./.amor/tmp')
         rockspecs = [file for file in dir_content if file.endswith('.rockspec')]
         makefiles = [file for file in dir_content if "Makefile" in file]
-
-        if len(rockspecs) > 0:
-            print('Building from Rockspec...')
-            res = cmd(["luarocks", "build", rockspecs[0], f'--tree="build"',], cwd="./.amor/tmp/",
+        
+        built_from_spec = False
+        try:
+            if len(rockspecs) > 0:
+                print('Building from Rockspec...')
+                res = cmd(["luarocks", "build", rockspecs[0], f'--tree="build"',], cwd="./.amor/tmp/",
                       stdout=PIPE, text=True)
 
-            for line in res.stdout.splitlines(): print(line)
+                for line in res.stdout.splitlines(): print(line)
 
-            res.check_returncode()
+                res.check_returncode()
             
-            with open(f"./.amor/tmp/{rockspecs[0]}", 'r') as rs:
-                rspec = rs.readlines()
+                with open(f"./.amor/tmp/{rockspecs[0]}", 'r') as rs:
+                    rspec = rs.readlines()
 
-            rspec.append(
-                    "if build and build.modules then return build.modules end\n"
-                    )
-            lua = LuaRuntime()
-            build_modules = lua.execute(''.join(rspec))
+                rspec.append(
+                        "if build and package then return { package = package,\
+                                                           modules = build.modules} end\n"
+                        )
+                lua = LuaRuntime()
+                build_modules = dict(lua.execute(''.join(rspec))) # type: ignore
+                print(build_modules)
+                mods = [mod for mod in build_modules["modules"]] # type: ignore
 
-            mods = [mod for mod in build_modules.keys()] # type: ignore
+                print(*mods)
+                print(build_modules["package"]) # type: ignore
+                if build_modules["package"] is not None: # type: ignore
+                    mod_name = build_modules["package"] # type: ignore
+                elif len(mods) > 0:
+                    mod_name = mods[0]
 
-            if len(mods) > 0:
-                module_name = mods[0]
+                if path.exists(f"./.amor/{mod_name}"):
+                    rmtree(f"./.amor/{mod_name}")
 
-            if path.exists(f"./.amor/{module_name}"):
-                rmtree(f"./.amor/{module_name}")
+                cwd = getcwd()
+                try:
+                    copytree(f"{cwd}/.amor/tmp/build/lib/lua/5.4/", f"{cwd}/.amor/{mod_name}/")
+                except:
+                    print("Default build location not found, trying fallback...")
+                    try:
+                        copytree(f"{cwd}/.amor/tmp/build/share/lua/5.4/{mod_name}/",
+                             f"{cwd}/.amor/{mod_name}/")
+                    except:
+                        print(f"Uh oh! {mod_name} could not be built!")
+                        raise
 
-            cwd = getcwd()
-            copytree(f"{cwd}/.amor/tmp/build/lib/lua/5.4/", f"{cwd}/.amor/{module_name}/")
+            elif len(makefiles) > 0:
+                print('Building from Makefile...')
+                for makefile in makefiles:
+                    with open(f"./.amor/tmp/{makefile}", "r") as mf:
+                        lines = mf.readlines()
 
-        elif len(makefiles) > 0:
-            print('Building from Makefile...')
-            for makefile in makefiles:
-                with open(f"./.amor/tmp/{makefile}", "r") as mf:
-                    lines = mf.readlines()
+                    for i in range(len(lines)):
+                        if 'config' in lines[i] or 'CONFIG' in lines[i]:
+                            lines[i] = f"# {lines[i]}"
 
-                for i in range(len(lines)):
-                    if 'config' in lines[i] or 'CONFIG' in lines[i]:
-                        lines[i] = f"# {lines[i]}"
+                    with open(f"./.amor/tmp/{makefile}", "w") as mf:
+                        mf.writelines(lines)
 
-                with open(f"./.amor/tmp/{makefile}", "w") as mf:
-                    mf.writelines(lines)
-
-            LUA_INCLUDE = environ.copy()["LUA_INCLUDE"]
-            print(LUA_INCLUDE)
-            res = cmd(["make", f"--include-dir={LUA_INCLUDE}"], stdout=PIPE,
-                      shell=True, text=True, cwd='./.amor/tmp/')
+                LUA_INCLUDE = environ.copy()["LUA_INCLUDE"]
+                print(LUA_INCLUDE)
+                res = cmd(["make", f"--include-dir={LUA_INCLUDE}"], stdout=PIPE,
+                          shell=True, text=True, cwd='./.amor/tmp/')
             
-            for line in res.stdout.splitlines(): print(line)
+                for line in res.stdout.splitlines(): print(line)
 
-            res.check_returncode()
+                res.check_returncode()
+        except:
+            print('Something went wrong whilst building, attempting source \
+                  copy...')
+        finally:
+            if not built_from_spec:
+                print('No build option found! Copying files...')
 
-        else:
-            print('No build option found! Copying files...')
+                if path.exists(f"./.amor/{mod_name}"):
+                    rmtree(f"./.amor/{mod_name}")
 
-            if path.exists(f"./.amor/{module_name}"):
-                rmtree(f"./.amor/{module_name}")
-
-            copytree("./.amor/tmp", f"./.amor/{module_name}",
-                     ignore=include_patterns("*.lua", "*.so"))
+                copytree("./.amor/tmp", f"./.amor/{mod_name}",
+                        ignore=include_patterns("*.lua", "*.so"))
         
         rmtree('./.amor/tmp')
 
@@ -158,12 +177,12 @@ def installOpt(args: Namespace):
         if conf['dependencies'] is None:
             conf['dependencies'] = {}
 
-        conf['dependencies'][module_name] = f"{repo}@{tag}={hash}"
+        conf['dependencies'][mod_name] = f"{repo}@{tag}={hash}"
 
         with open('amor.toml', 'w') as amor_conf:
             dump(conf, amor_conf)
 
-        print(f"Installed {module_name}!")
+        print(f"Installed {mod_name}!")
     return
 
 
