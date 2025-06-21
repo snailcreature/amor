@@ -11,7 +11,7 @@ from love import loveOpt
 # amor version
 __version__ = '0.1.1'
 __author__ = 'Sam Drage (github: snailcreature)'
-__date__ = '2025-06-19'
+__date__ = '2025-06-21'
 
 
 def defaultOpt(args: Namespace):
