@@ -16,9 +16,16 @@ format.
 
 ## [UNRELEASED]
 
+### Added
+
+ - Added copy source fallback if build-on-install fails
+ - Added delete empty directories after copy source fallback
+
 ### Changed
 
  - Moved function definitions for different commands into separate Python files
+
+***
 
 ## [0.1.0] - 2025-06-03
 

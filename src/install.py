@@ -21,7 +21,7 @@ def installOpt(args: Namespace):
                 from lupa.lua51 import LuaRuntime
 
 
-    from utils import getRepoHeadHash, getRepoTagHashes, include_patterns
+    from utils import getRepoHeadHash, getRepoTagHashes, include_patterns, remove_empty_dirs
 
     modules: list[str] = args.module
     
@@ -168,6 +168,8 @@ def installOpt(args: Namespace):
 
                 copytree("./.amor/tmp", f"./.amor/{mod_name}",
                         ignore=include_patterns("*.lua", "*.so"))
+
+                remove_empty_dirs(f"./.amor/{mod_name}/")
         
         rmtree('./.amor/tmp')
 
