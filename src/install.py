@@ -159,6 +159,8 @@ def installOpt(args: Namespace):
         except:
             print('Something went wrong whilst building, attempting source \
                   copy...')
+        else:
+            built_from_spec = True
         finally:
             if not built_from_spec:
                 print('No build option found! Copying files...')

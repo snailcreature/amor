@@ -14,6 +14,15 @@ format.
 
 ***
 
+## [0.1.2] - 2025-06-24
+
+### Fixed
+
+ - Major bug in `install.py` script that would attempt to double-copy a built module
+ - Minor bugs in `setup` script where `[[-z` command could not be found
+
+***
+
 ## [0.1.1] - 2025-06-21
 
 ### Added
