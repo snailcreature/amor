@@ -14,6 +14,16 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Fixed
+
+ - Minor bug in `install.py` that meant built-on-install modules had the
+   incorrect name
+ - Major bug in `build.py` that would not copy included assets
+
+***
+
 ## [0.1.2] - 2025-06-24
 
 ### Fixed
