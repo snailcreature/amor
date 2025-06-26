@@ -38,6 +38,9 @@ def buildOpt(args: Namespace):
     lua_path = f'./.amor/?.lua;./{source_dir}/?.lua;./.amor/?/init.lua;{str(lpath)};'
     lua_cpath = f';./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{str(cpath)};'
     
+    if args.clean:
+        rmtree(f'./{build_dir}')
+
     if not path.exists('./.bld'):
         mkdir('./.bld')
 
