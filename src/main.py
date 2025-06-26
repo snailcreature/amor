@@ -78,6 +78,8 @@ run.set_defaults(func=runOpt)
 # Build
 build = subparsers.add_parser("build", aliases=["b"], help="Build project into\
         single directory for Löve.")
+build.add_argument("--clean", "-c", action="store_true", help="Remove existing\
+                   build folder contents.")
 build.set_defaults(func=buildOpt)
 
 # Love

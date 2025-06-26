@@ -16,6 +16,11 @@ format.
 
 ## [UNRELEASED]
 
+### Added
+
+ - Calling `amor build --clean` will remove the existing build directory before
+   beginning
+
 ### Fixed
 
  - Minor bug in `install.py` that meant built-on-install modules had the
