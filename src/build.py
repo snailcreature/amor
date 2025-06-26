@@ -9,7 +9,7 @@ def buildOpt(args: Namespace):
     from luaparser import ast, astnodes
     from pickle import load as pload, dump as pdump
     from shutil import rmtree, copytree, copyfile
-    from fnmatch import filter as fnmatch
+    from fnmatch import fnmatch
     try:
         from lupa.lua54 import LuaRuntime
     except ImportError:
@@ -162,9 +162,11 @@ def buildOpt(args: Namespace):
         directory = listdir(dir)
         
         for p in directory:
+            print(p)
             if path.isdir(f"{dir}/{p}"):
                 asset_dict[p] = recRegisterAssets(f"{dir}/{p}", {})
             else:
+                print(f"Checking {dir}/{p} against", *include)
                 for pattern in include:
                     if fnmatch(p, pattern):
                         print(f"Found {dir}/{p}")
@@ -197,6 +199,7 @@ def buildOpt(args: Namespace):
 
     print(include)
     assets = recRegisterAssets(f"./{source_dir}")
+    print(*assets)
     if len(assets.keys()) > 0:
         print("Found assets")
         print(assets)
