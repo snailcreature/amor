@@ -111,13 +111,24 @@ def installOpt(args: Namespace):
                 lua = LuaRuntime()
                 build_modules = dict(lua.execute(''.join(rspec))) # type: ignore
                 print(build_modules)
-                mods = [mod for mod in build_modules["modules"]] # type: ignore
+                mods: list[str] = [mod for mod in build_modules["modules"]] # type: ignore
+                package: str | None = build_modules['package'] # type: ignore
 
                 print(*mods)
                 print(build_modules["package"]) # type: ignore
-                if build_modules["package"] is not None: # type: ignore
-                    mod_name = build_modules["package"] # type: ignore
-                elif len(mods) > 0:
+                has_package = package is not None
+                renamed_mod = list(filter(lambda m: '.' not in m, mods))
+                mismatch_module_name = len(renamed_mod) != 0 and package not in renamed_mod
+                print(*renamed_mod)
+
+                if has_package:
+                    print('has package', package)
+                    mod_name = package
+                if mismatch_module_name:
+                    print('but has mismatch', renamed_mod[0])
+                    mod_name = renamed_mod[0]
+                if not has_package and not mismatch_module_name and len(mods) > 0:
+                    print('fallback')
                     mod_name = mods[0]
 
                 if path.exists(f"./.amor/{mod_name}"):
