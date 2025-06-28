@@ -1,5 +1,5 @@
 local zip = require('zip')
-local lfs = require('luafilesystem.lfs')
+local lfs = require('lfs')
 
 return {
     hello = function ()

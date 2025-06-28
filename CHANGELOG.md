@@ -14,6 +14,14 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Fixed
+
+ - Build script now ignores `require`-ing of modules bundled with Love
+
+***
+
 ## [0.2.1] - 2025-06-28
 
 ### Fixed

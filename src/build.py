@@ -10,6 +10,7 @@ def buildOpt(args: Namespace):
     from pickle import load as pload, dump as pdump
     from shutil import rmtree, copytree, copyfile
     from fnmatch import fnmatch
+    from constants import love_builtins
     try:
         from lupa.lua54 import LuaRuntime
     except ImportError:
@@ -66,7 +67,10 @@ def buildOpt(args: Namespace):
                         res = lua.eval(f'package.searchpath("{mod.s}",\
                                 "{lua_path+lua_cpath}")')
                         if '(None,' in str(res):
-                             print(f'Could not find {mod.s}')
+                             if mod.s in love_builtins:
+                                print(f"{mod.s} included with Love")
+                             else:
+                                print(f'Could not find {mod.s}')
                              continue
 
                         mod_map[mod.s] = str(res)

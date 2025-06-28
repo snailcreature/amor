@@ -65,4 +65,8 @@ package.loaded["{mod}"] = {mod}
 return {mod}
 """
 
-
+love_builtins = [
+        "enet",
+        "socket",
+        "utf8"
+        ]
