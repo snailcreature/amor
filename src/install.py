@@ -91,6 +91,8 @@ def installOpt(args: Namespace):
         makefiles = [file for file in dir_content if "Makefile" in file]
         
         built_from_spec = False
+        built_from_rockspec = False
+        built_from_makefile = False
         try:
             if len(rockspecs) > 0:
                 print('Building from Rockspec...')
@@ -145,6 +147,7 @@ def installOpt(args: Namespace):
                     except:
                         print(f"Uh oh! {mod_name} could not be built!")
                         raise
+                built_from_rockspec = True
 
             elif len(makefiles) > 0:
                 print('Building from Makefile...')
@@ -167,12 +170,15 @@ def installOpt(args: Namespace):
                 for line in res.stdout.splitlines(): print(line)
 
                 res.check_returncode()
+                built_from_makefile = True
         except:
             print('Something went wrong whilst building, attempting source \
                   copy...')
         else:
-            built_from_spec = True
+            print('No errors!')
+            built_from_spec = built_from_rockspec or built_from_makefile
         finally:
+            print('Final checks...')
             if not built_from_spec:
                 print('No build option found! Copying files...')
 

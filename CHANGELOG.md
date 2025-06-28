@@ -14,6 +14,15 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Fixed
+
+ - Major bug in install script that skips built dependencies that do not have a
+   build option (i.e. no rockspec)
+
+***
+
 ## [0.2.0] - 2025-06-26
 
 ### Added
