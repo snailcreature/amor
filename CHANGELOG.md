@@ -14,7 +14,7 @@ format.
 
 ***
 
-## [UNRELEASED]
+## [0.2.1] - 2025-06-28
 
 ### Fixed
 
