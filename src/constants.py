@@ -57,12 +57,19 @@ end
 """.splitlines(keepends=True)
 
 # Template for init.lua for C modules
-init_lua_template = """\
+init_lua_template_so = """\
 local Path = (...):gsub("%p", "/")
 local RequirePath = ...
 local {mod} = package.loadlib("{mod}", Path.."/{mod}.so")
 package.loaded["{mod}"] = {mod}
 return {mod}
+"""
+
+init_lua_template_lua = """\
+local RequirePath = ...
+local mod = require "{mod}"
+package.loaded["{mod}"] = mod
+return mod
 """
 
 love_builtins = [

@@ -19,6 +19,8 @@ format.
 ### Fixed
 
  - Build script now ignores `require`-ing of modules bundled with Love
+ - Install script now creates an `init.lua` for installed modules that lack them
+   even if they are not a compiled `*.so`
 
 ***
 

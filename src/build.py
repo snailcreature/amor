@@ -10,7 +10,6 @@ def buildOpt(args: Namespace):
     from pickle import load as pload, dump as pdump
     from shutil import rmtree, copytree, copyfile
     from fnmatch import fnmatch
-    from constants import love_builtins
     try:
         from lupa.lua54 import LuaRuntime
     except ImportError:
@@ -22,7 +21,7 @@ def buildOpt(args: Namespace):
             except ImportError:
                 from lupa.lua51 import LuaRuntime
 
-    from constants import init_lua_template
+    from constants import init_lua_template_so, init_lua_template_lua, love_builtins
 
     with open('amor.toml', 'r') as conf_file:
         conf = load(conf_file)
@@ -115,10 +114,17 @@ def buildOpt(args: Namespace):
                 rmtree(out_dir)
             copytree('/'.join(copy_path), f"./{build_dir}/ext/{mod_dir}")
             print("Copied", mod_map[key])
+            no_init = 'init.lua' not in listdir(f"./{build_dir}/ext/{mod_dir}")
             if mod_map[key].endswith('.so'):
-                init_lua_content = init_lua_template.replace("{mod}", key)
+                init_lua_content = init_lua_template_so.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
+                print('Wrote init.lua for *.so')
+            elif no_init:
+                init_lua_content = init_lua_template_lua.replace("{mod}", key)
+                with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
+                    init_file.writelines(init_lua_content.splitlines(keepends=True))
+                print('Wrote init.lua for *.lua')
 
     
     def recCompile(directory: str):
