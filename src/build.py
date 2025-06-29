@@ -21,7 +21,7 @@ def buildOpt(args: Namespace):
             except ImportError:
                 from lupa.lua51 import LuaRuntime
 
-    from constants import init_lua_template
+    from constants import init_lua_template_so, init_lua_template_lua, love_builtins
 
     with open('amor.toml', 'r') as conf_file:
         conf = load(conf_file)
@@ -66,7 +66,10 @@ def buildOpt(args: Namespace):
                         res = lua.eval(f'package.searchpath("{mod.s}",\
                                 "{lua_path+lua_cpath}")')
                         if '(None,' in str(res):
-                             print(f'Could not find {mod.s}')
+                             if mod.s in love_builtins:
+                                print(f"{mod.s} included with Love")
+                             else:
+                                print(f'Could not find {mod.s}')
                              continue
 
                         mod_map[mod.s] = str(res)
@@ -111,10 +114,17 @@ def buildOpt(args: Namespace):
                 rmtree(out_dir)
             copytree('/'.join(copy_path), f"./{build_dir}/ext/{mod_dir}")
             print("Copied", mod_map[key])
+            no_init = 'init.lua' not in listdir(f"./{build_dir}/ext/{mod_dir}")
             if mod_map[key].endswith('.so'):
-                init_lua_content = init_lua_template.replace("{mod}", key)
+                init_lua_content = init_lua_template_so.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
+                print('Wrote init.lua for *.so')
+            elif no_init:
+                init_lua_content = init_lua_template_lua.replace("{mod}", key)
+                with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
+                    init_file.writelines(init_lua_content.splitlines(keepends=True))
+                print('Wrote init.lua for *.lua')
 
     
     def recCompile(directory: str):
