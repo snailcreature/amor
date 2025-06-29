@@ -14,6 +14,16 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Added
+
+ - Default `.luarc.json` configuration creation on `new` or `init` to ensure
+   [`lua-language-server`](https://github.com/LuaLS/lua-language-server)
+   recognises the project even without Git initialised
+
+***
+
 ## [0.2.2] - 2025-06-29
 
 ### Fixed
