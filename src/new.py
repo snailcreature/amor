@@ -8,7 +8,8 @@ def newOpt(args: Namespace):
     from toml import dump
     from git import Repo
 
-    from constants import default_conf, main_lua_content, gitignore_lines, gitattributes_lines
+    from constants import default_conf, main_lua_content, gitignore_lines,\
+    gitattributes_lines, luarc
     
     name = args.name[0]
      
@@ -30,6 +31,10 @@ def newOpt(args: Namespace):
     print("Creating ./"+name+"/amor.conf...")
     with open('./'+name+'/amor.toml', 'w') as conf_file:
         dump(conf, conf_file)
+
+    print("Creating ./"+name+"/.luarc.json...")
+    with open(f"./{name}/.luarc.json", 'w') as luarc_file:
+        luarc_file.writelines(luarc)
 
     if args.git_init:
         print("Creating .gitignore...")

@@ -6,8 +6,10 @@ def initOpt(args: Namespace):
     """
     from toml import load, dump
     from git import Repo
+    from os import listdir
 
-    from constants import default_conf, gitignore_lines, gitattributes_lines
+    from constants import default_conf, gitignore_lines, gitattributes_lines,\
+            luarc
     
     with open('amor.toml', 'r') as conf:
         amor_conf: dict = load(conf)
@@ -25,6 +27,12 @@ def initOpt(args: Namespace):
 
     with open('amor.toml', 'w') as conf:
         dump(amor_conf, conf)
+    
+    print("Creating .luarc.json...")
+    luarc_exists = ".luarc.json" in listdir('./')
+    if not luarc_exists:
+        with open('.luarc.json', 'w') as luarc_file:
+            luarc_file.writelines(luarc)
 
     if args.git_init:
         print("Creating .gitignore...")

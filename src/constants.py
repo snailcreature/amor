@@ -24,6 +24,18 @@ default_conf = {
             "dependencies": {},
             }
 
+# Default .luarc
+
+luarc = """\
+{
+    "Lua": {
+        "runtime": {
+            "version": "Lua 5.4"
+        }
+    }
+}
+""".splitlines(keepends=True)
+
 # Default .gitignore for projects
 gitignore_lines = """\
 /build
