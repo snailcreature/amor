@@ -14,7 +14,7 @@ format.
 
 ***
 
-## [UNRELEASED]
+## [0.3.0] - 2025-07-03
 
 ### Added
 
