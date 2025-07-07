@@ -83,3 +83,6 @@ Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
 - [ ] Incremental builds
 - [ ] Dev dependencies
 - [ ] Dependency execution
+- [ ] Non-Github installs
+    - [ ] Gitlab
+    - [ ] Luarocks
