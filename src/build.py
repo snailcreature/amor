@@ -10,6 +10,7 @@ def buildOpt(args: Namespace):
     from pickle import load as pload, dump as pdump
     from shutil import rmtree, copytree, copyfile
     from fnmatch import fnmatch
+    from re import sub
     try:
         from lupa.lua54 import LuaRuntime
     except ImportError:
@@ -142,6 +143,8 @@ def buildOpt(args: Namespace):
                     tree = pload(dat)
                 
                 comped = ast.to_lua_source(tree)
+
+                comped = sub(r'\s+\(', '(', comped)
 
                 for mod in mod_map.keys():
                     if not f"./{source_dir}/" in mod_map[mod]:

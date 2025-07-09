@@ -14,6 +14,14 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Fixed
+
+ - Long chains of function calls no longer gain a line-break on compilation
+
+***
+
 ## [0.3.0] - 2025-07-03
 
 ### Added
