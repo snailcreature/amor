@@ -28,19 +28,19 @@ default_conf = {
 
 luarc = """\
 {
-    "Lua": {
-        "runtime": {
-            "version": "Lua 5.4"
-        }
+    "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+    "runtime": {
+        "version": "Lua 5.4"
     }
 }
 """.splitlines(keepends=True)
 
 # Default .gitignore for projects
 gitignore_lines = """\
-/build
-/dist
-/.amor
+.amor/
+.bld/
+build/
+dist/
 """.splitlines(keepends=True)
 
 # Default .gitattributes for projects
