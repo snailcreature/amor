@@ -14,6 +14,20 @@ format.
 
 ***
 
+## [UNRELEASED]
+
+### Changed
+
+ - Updated `.luarc.json` default to include `$schema`
+ - Updated `.gitignore` to ignore `.bld/` by default
+
+### Fixed
+
+ - Long chains of lua function calls no longer gain a line-break on compilation
+ - Default `.luarc.json` is properly formatted
+
+***
+
 ## [0.3.0] - 2025-07-03
 
 ### Added
