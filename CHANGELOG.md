@@ -14,7 +14,7 @@ format.
 
 ***
 
-## [UNRELEASED]
+## [0.4.0] - 2025-08-02
 
 ### Changed
 

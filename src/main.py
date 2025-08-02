@@ -9,9 +9,9 @@ from build import buildOpt
 from love import loveOpt
 
 # amor version
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 __author__ = 'Sam Drage (github: snailcreature)'
-__date__ = '2025-07-03'
+__date__ = '2025-08-02'
 
 
 def defaultOpt(args: Namespace):
