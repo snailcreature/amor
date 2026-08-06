@@ -25,13 +25,15 @@ default_conf = {
             }
 
 # Default .luarc
-
 luarc = """\
 {
     "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
     "runtime": {
         "version": "Lua 5.4"
-    }
+    },
+    "workspace": {
+        "library": ["${workspaceFolder:.amor}"],
+    },
 }
 """.splitlines(keepends=True)
 
