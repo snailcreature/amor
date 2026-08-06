@@ -1,20 +1,30 @@
-from argparse import Namespace
+from typing import Annotated
 
-def uninstallOpt(args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def uninstallOpt(module: Annotated[list[str], typer.Argument(help="Module(s) to\
+        uninstall, given in format `<module_name>` (as you would require\
+        in a Lua script).")]):
     """
-    Uninstall the given repositor(y/ies).
+    Uninstall the given module(s) from the project.
     """
+
+    if len(module) == 0:
+        print("You must provide at least 1 module to uninstall.")
+        raise typer.Exit()
+
     from toml import load, dump
     from shutil import rmtree
     
-    modules: list[str] = args.module
-
     with open('amor.toml', 'r') as amor_conf:
         conf = load(amor_conf)
 
     deps: dict[str, str] = conf["dependencies"]
 
-    to_delete: list[str] = [dep for dep in deps if dep in modules]
+    to_delete: list[str] = [dep for dep in deps if dep in module]
 
     for dep in to_delete:
         print(f'Uninstalling {dep}')

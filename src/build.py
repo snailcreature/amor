@@ -1,8 +1,13 @@
-from argparse import Namespace
+from typing import Annotated
 
-def buildOpt(args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder contents.")] = False):
     """
-    Build the project.
+    Build project into single directory for Löve.
     """
     from toml import load
     from os import path, mkdir, listdir
@@ -39,7 +44,7 @@ def buildOpt(args: Namespace):
     lua_path = f'./.amor/?.lua;./{source_dir}/?.lua;./.amor/?/init.lua;{str(lpath)};'
     lua_cpath = f';./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{str(cpath)};'
     
-    if args.clean:
+    if clean:
         rmtree(f'./{build_dir}')
 
     if not path.exists('./.bld'):

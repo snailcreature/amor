@@ -1,8 +1,13 @@
-from argparse import Namespace
+from typing import Annotated
 
-def loveOpt(_args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def love():
     """
-    Run Löve2D on the project build directory.
+    Run Löve using the current project's build directory.
     """
     from toml import load
     from os import getcwd, environ

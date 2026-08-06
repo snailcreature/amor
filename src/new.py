@@ -1,8 +1,14 @@
-from argparse import Namespace
+from typing import Annotated
 
-def newOpt(args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def new(name: Annotated[str, typer.Argument(help="The name of the project. A directory with thtis name will be created.")], \
+        no_git: Annotated[bool, typer.Option(help="Do not initialise git in project")] = False):
     """
-    Create a new repository from scratch.
+    Create a new project folder.
     """
     from os import mkdir, path
     from toml import dump
@@ -11,8 +17,6 @@ def newOpt(args: Namespace):
     from constants import default_conf, main_lua_content, gitignore_lines,\
     gitattributes_lines, luarc
     
-    name = args.name[0]
-     
     if name == '.':
         print("Please run `amor init` to start your project in the current\
                 directory.")
@@ -36,7 +40,7 @@ def newOpt(args: Namespace):
     with open(f"./{name}/.luarc.json", 'w') as luarc_file:
         luarc_file.writelines(luarc)
 
-    if args.git_init:
+    if not no_git:
         print("Creating .gitignore...")
         with open("./"+name+"/.gitignore", 'w') as gitignore:
             gitignore.writelines(gitignore_lines)

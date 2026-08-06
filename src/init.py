@@ -1,8 +1,15 @@
-from argparse import Namespace
+from typing import Annotated
 
-def initOpt(args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def init(project_name: Annotated[str | None, typer.Argument(help="The name of the project.")] = None, \
+        force: Annotated[bool, typer.Option(help="Force the creation of a fresh amor.toml config file.")] = False, \
+        no_git: Annotated[bool, typer.Option(help="Do not initialise git in project")] = False):
     """
-    Initialise amor in the current repository.
+    Initialise an amor project in the current directory.
     """
     from toml import load, dump
     from git import Repo
@@ -14,7 +21,7 @@ def initOpt(args: Namespace):
     with open('amor.toml', 'r') as conf:
         amor_conf: dict = load(conf)
 
-    if not args.force and len(amor_conf.keys()) != 0:
+    if not force and len(amor_conf.keys()) != 0:
         print('amor.toml already exists!\nRun with --force to reset the config\
               file')
         return
@@ -22,8 +29,8 @@ def initOpt(args: Namespace):
     amor_conf = default_conf
     
     print("Creating amor.toml...")
-    if args.project_name != None:
-        amor_conf["project"]["name"] = args.project_name
+    if project_name != None and len(project_name) > 0:
+        amor_conf["project"]["name"] = project_name
 
     with open('amor.toml', 'w') as conf:
         dump(amor_conf, conf)
@@ -34,7 +41,7 @@ def initOpt(args: Namespace):
         with open('.luarc.json', 'w') as luarc_file:
             luarc_file.writelines(luarc)
 
-    if args.git_init:
+    if not no_git:
         print("Creating .gitignore...")
         with open(".gitignore", 'w') as gitignore:
             gitignore.writelines(gitignore_lines)

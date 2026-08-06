@@ -44,7 +44,7 @@ python3 -m pip install -r requirements.txt
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "building amor..."
 
-if ! pyinstaller src/main.py --clean --noconfirm -n amor; then
+if ! pyinstaller main.py --clean --noconfirm -n amor; then
     printf "\n\e[1;91mSomething went wrong!\e[m\n"
     printf "\n\e[93mIf you did not trigger this, check the logs. Otherwise, try again when ready.\e[m\n\n"
     exit 1

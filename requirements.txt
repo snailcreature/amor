@@ -1,6 +1,22 @@
-toml >= 0.10.2, == 0.10.*
-GitPython >= 3.1.44, == 3.1.*
-luaparser >= 3.3.0, == 3.3.*
-lupa >= 2.4.0, == 2.4.*
-types-lupa >= 2.4.0, == 2.4.*
-pyinstaller >= 6.13.0, == 6.13.*
+altgraph==0.17.5
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.13.2
+gitdb==4.0.12
+gitpython==3.1.58
+luaparser==3.3.1
+lupa==2.4
+macholib==1.16.4
+markdown-it-py==4.2.0
+mdurl==0.1.2
+multimethod==2.0.2
+packaging==26.3
+pygments==2.20.0
+pyinstaller==6.13.0
+pyinstaller-hooks-contrib==2026.6
+rich==15.0.0
+setuptools==83.0.0
+shellingham==1.5.4
+smmap==5.0.3
+toml==0.10.2
+typer==0.27.1
+types-lupa==2.4.0.20250112

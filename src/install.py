@@ -1,6 +1,15 @@
-from argparse import Namespace
+from typing import Annotated
 
-def installOpt(args: Namespace):
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def install(module: Annotated[list[str] | None, typer.Argument(help="Module(s) to install \
+from Github. Given in format '<username>/<repository>(@<tag>)'. \
+If <tag> is not present the most current version will be installed. If <tag> is \
+present, but does not exist on repository, the most current version will be installed.")], \
+            force: Annotated[bool, typer.Option(help="Force the re-installation of all modules.")] = False):
     """
     Install given repositor(y/ies) or all repositories in the project amor.toml.
     """
@@ -23,11 +32,13 @@ def installOpt(args: Namespace):
 
     from utils import getRepoHeadHash, getRepoTagHashes, include_patterns, remove_empty_dirs
 
-    modules: list[str] = args.module
-    
     hashes = {}
 
-    if args.force:
+    modules = []
+    if module != None:
+        modules = module
+
+    if force:
         for dir in listdir('./.amor'):
             try:
                 rmtree(f"./.amor/{dir}/")
@@ -52,15 +63,15 @@ def installOpt(args: Namespace):
             print(mod_name, mod_hash)
 
 
-    for module in modules:
-        print('Installing', module+"...")
+    for package in modules:
+        print('Installing', package+"...")
         if path.exists('./.amor/tmp/'):
             rmtree('./.amor/tmp/')
 
         tag = None
-        repo = module
-        if '@' in module:
-            repo, tag = module.split('@')
+        repo = package
+        if '@' in package:
+            repo, tag = package.split('@')
         mod_name = repo.split('/')[-1]
     
         if tag == 'None':
