@@ -5,7 +5,7 @@ import typer
 app = typer.Typer()
 
 @app.command()
-def uninstallOpt(module: Annotated[list[str], typer.Argument(help="Module(s) to\
+def uninstall(module: Annotated[list[str], typer.Argument(help="Module(s) to\
         uninstall, given in format `<module_name>` (as you would require\
         in a Lua script).")]):
     """

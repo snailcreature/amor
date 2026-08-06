@@ -40,37 +40,30 @@ else
     printf "\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n\n" "Löve2D found!"
 fi
 
-python3 -m pip install -r requirements.txt
-
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "building amor..."
 
-if ! pyinstaller main.py --clean --noconfirm -n amor; then
+rm -rf ./dist/*
+
+read -d '' reqs <<EOF
+$(< requirements.txt)
+-e file://$(pwd)
+EOF
+echo "$reqs" > _requirements.txt
+
+if ! python3 -m pip wheel -r _requirements.txt --no-require-hashes -w dist; then
     printf "\n\e[1;91mSomething went wrong!\e[m\n"
     printf "\n\e[93mIf you did not trigger this, check the logs. Otherwise, try again when ready.\e[m\n\n"
     exit 1
 fi
 
+rm -f _requirements.txt
+
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "amor built!"
-relative_path="dist/amor"
-absolute_path="$(pwd)/${relative_path}"
 
-. $HOME/.profile
+wheel=$(ls dist | grep -E "^amor(.*)\.whl$")
 
-pattern=":$absolute_path:"
-case :$PATH: in
-    *$pattern*) 
-        printf '\n\e[93m%-6s\e[m\n' "$absolute_path already in PATH!"
-        ;;
-    *) 
-        printf '\n\e[93m%-6s\e[m\n' "Adding the following path to your system PATH:"
-        printf "$absolute_path\n"
-        echo "export AMOR_DIR=$absolute_path" >> $HOME/.profile
-        echo "export PATH=\$AMOR_DIR:\$PATH" >> $HOME/.profile
-        printf "\$HOME/.profile updated"
-        ;;
-esac
+python3 -m pip install ./dist/$wheel
 
-. $HOME/.profile
+amor --install-completion
 
 printf "\nAll set up \e[1;52;49;91m❤\e[m\n\n"
-
