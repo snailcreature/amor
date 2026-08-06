@@ -4,8 +4,13 @@ import typer
 
 app = typer.Typer()
 
+
 @app.command()
-def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder contents.")] = False):
+def build(
+    clean: Annotated[
+        bool, typer.Option(help="Remove existing build folder contents.")
+    ] = False,
+):
     """
     Build project into single directory for Löve.
     """
@@ -16,6 +21,7 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
     from shutil import rmtree, copytree, copyfile
     from fnmatch import fnmatch
     from re import sub
+
     try:
         from lupa.lua54 import LuaRuntime
     except ImportError:
@@ -29,7 +35,7 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
 
     from constants import init_lua_template_so, init_lua_template_lua, love_builtins
 
-    with open('amor.toml', 'r') as conf_file:
+    with open("amor.toml", "r") as conf_file:
         conf = load(conf_file)
 
     source_dir = conf["project"]["source_dir"]
@@ -39,71 +45,73 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
 
     lua = LuaRuntime()
 
-    lpath = lua.eval('package.path')
-    cpath = lua.eval('package.cpath')
-    lua_path = f'./.amor/?.lua;./{source_dir}/?.lua;./.amor/?/init.lua;{str(lpath)};'
-    lua_cpath = f';./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{str(cpath)};'
-    
+    lpath = lua.eval("package.path")
+    cpath = lua.eval("package.cpath")
+    lua_path = f"./.amor/?.lua;./{source_dir}/?.lua;./.amor/?/init.lua;{str(lpath)};"
+    lua_cpath = f";./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{str(cpath)};"
+
     if clean:
-        rmtree(f'./{build_dir}')
+        rmtree(f"./{build_dir}")
 
-    if not path.exists('./.bld'):
-        mkdir('./.bld')
-
+    if not path.exists("./.bld"):
+        mkdir("./.bld")
 
     def recScanSource(file_path: str, mod_map: dict[str, str]) -> dict[str, str]:
         """
         Scan the project source for required modules.
         """
-        with open(file_path, 'r') as src_file:
-            lua_code = ''.join(src_file.readlines())
+        with open(file_path, "r") as src_file:
+            lua_code = "".join(src_file.readlines())
 
         lua_ast = ast.parse(lua_code)
 
-        for node in ast.walk(lua_ast): # type: ignore
+        for node in ast.walk(lua_ast):  # type: ignore
             if isinstance(node, astnodes.Call):
                 node: astnodes.Call = node
                 if isinstance(node.func, astnodes.Name):
-                    func: astnodes.Name = node.func # type: ignore
+                    func: astnodes.Name = node.func  # type: ignore
 
-                    if func.id == 'require':
-                        mod: astnodes.String = node.args[0] # type: ignore
+                    if func.id == "require":
+                        mod: astnodes.String = node.args[0]  # type: ignore
 
-                        res = lua.eval(f'package.searchpath("{mod.s}",\
-                                "{lua_path+lua_cpath}")')
-                        if '(None,' in str(res):
-                             if mod.s in love_builtins:
+                        res = lua.eval(
+                            f'package.searchpath("{mod.s}",\
+                                "{lua_path + lua_cpath}")'
+                        )
+                        if "(None," in str(res):
+                            if mod.s in love_builtins:
                                 print(f"{mod.s} included with Love")
-                             else:
-                                print(f'Could not find {mod.s}')
-                             continue
+                            else:
+                                print(f"Could not find {mod.s}")
+                            continue
 
                         mod_map[mod.s] = str(res)
-        
-        
-        split_path = file_path.split('/')
-        bld_path = '/'.join(["./.bld"] + split_path[2:]).replace('.lua', '.dat')
-        if len(split_path) > 2 and not split_path[1].endswith('.lua'):
-            for i in range(2, len(split_path)-1):
-                tmp = '/'.join(split_path[2:i+1])
+
+        split_path = file_path.split("/")
+        bld_path = "/".join(["./.bld"] + split_path[2:]).replace(".lua", ".dat")
+        if len(split_path) > 2 and not split_path[1].endswith(".lua"):
+            for i in range(2, len(split_path) - 1):
+                tmp = "/".join(split_path[2 : i + 1])
                 if not path.exists(f"./.bld/{tmp}"):
                     mkdir(f"./.bld/{tmp}")
-       
-        with open(bld_path, 'wb') as dat:
+
+        with open(bld_path, "wb") as dat:
             pdump(lua_ast, dat)
 
-        print('Scanned', file_path)
+        print("Scanned", file_path)
         for p in mod_map.copy().values():
             if f"./{source_dir}/" in p:
                 print(p)
                 sub_mod_map = recScanSource(p, {})
-                for v in sub_mod_map.keys(): mod_map[v] = sub_mod_map[v]
+                for v in sub_mod_map.keys():
+                    mod_map[v] = sub_mod_map[v]
 
         return mod_map
 
-    mod_map: dict[str, str] = recScanSource(f'./{source_dir}/{entry}', {})
-                
-    for key in mod_map.keys(): print(key, mod_map[key])
+    mod_map: dict[str, str] = recScanSource(f"./{source_dir}/{entry}", {})
+
+    for key in mod_map.keys():
+        print(key, mod_map[key])
 
     if not path.exists(f"./{build_dir}"):
         mkdir(f"./{build_dir}")
@@ -113,26 +121,25 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
 
     for key in mod_map.keys():
         if not f"./{source_dir}/" in mod_map[key]:
-            copy_path = mod_map[key].split('/')[:-1]
+            copy_path = mod_map[key].split("/")[:-1]
             mod_dir = copy_path[-1]
             out_dir = f"./{build_dir}/ext/{mod_dir}"
             if path.exists(out_dir):
                 rmtree(out_dir)
-            copytree('/'.join(copy_path), f"./{build_dir}/ext/{mod_dir}")
+            copytree("/".join(copy_path), f"./{build_dir}/ext/{mod_dir}")
             print("Copied", mod_map[key])
-            no_init = 'init.lua' not in listdir(f"./{build_dir}/ext/{mod_dir}")
-            if mod_map[key].endswith('.so'):
+            no_init = "init.lua" not in listdir(f"./{build_dir}/ext/{mod_dir}")
+            if mod_map[key].endswith(".so"):
                 init_lua_content = init_lua_template_so.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
-                print('Wrote init.lua for *.so')
+                print("Wrote init.lua for *.so")
             elif no_init:
                 init_lua_content = init_lua_template_lua.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
-                print('Wrote init.lua for *.lua')
+                print("Wrote init.lua for *.lua")
 
-    
     def recCompile(directory: str):
         """
         Compile the project source directory.
@@ -140,48 +147,51 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
         dir_list = listdir(directory)
 
         for dir in dir_list:
-            full_path = directory+'/'+dir
+            full_path = directory + "/" + dir
             if path.isdir(full_path):
                 recCompile(full_path)
             else:
-                with open(full_path, 'rb') as dat:
+                with open(full_path, "rb") as dat:
                     tree = pload(dat)
-                
+
                 comped = ast.to_lua_source(tree)
 
-                comped = sub(r'\s+\(', '(', comped)
+                comped = sub(r"\s+\(", "(", comped)
 
                 for mod in mod_map.keys():
                     if not f"./{source_dir}/" in mod_map[mod]:
-                        comped = comped.replace(f"require(\"{mod}", f"require(\"ext.{mod}")
-                        comped = comped.replace(f"require('{mod}",
-                                                          f"require('ext.{mod}")
+                        comped = comped.replace(
+                            f'require("{mod}', f'require("ext.{mod}'
+                        )
+                        comped = comped.replace(
+                            f"require('{mod}", f"require('ext.{mod}"
+                        )
 
-                out_dir = full_path.split('/')
-                comp_path = '/'.join([f'./{build_dir}'] +
-                                     out_dir[2:]).replace('.dat', '.lua')
-                if len(out_dir) > 2 and not out_dir[1].endswith('.dat'):
-                    for i in range(2, len(out_dir)-1):
-                        tmp = '/'.join(out_dir[2:i+1])
-                        if not path.exists(f'./{build_dir}/{tmp}'):
+                out_dir = full_path.split("/")
+                comp_path = "/".join([f"./{build_dir}"] + out_dir[2:]).replace(
+                    ".dat", ".lua"
+                )
+                if len(out_dir) > 2 and not out_dir[1].endswith(".dat"):
+                    for i in range(2, len(out_dir) - 1):
+                        tmp = "/".join(out_dir[2 : i + 1])
+                        if not path.exists(f"./{build_dir}/{tmp}"):
                             mkdir(f"./{build_dir}/{tmp}")
 
-                with open(comp_path, 'w') as out:
+                with open(comp_path, "w") as out:
                     out.write(comped)
-                print('Built', comp_path)
+                print("Built", comp_path)
         return
 
+    recCompile("./.bld")
 
-    recCompile('./.bld')
-
-    def recRegisterAssets(dir: str, asset_dict = {}):
+    def recRegisterAssets(dir: str, asset_dict={}):
         """
         Register assets in the project source based on the build.include pattern
         list.
         """
-        print(f'Checking {dir}...')
+        print(f"Checking {dir}...")
         directory = listdir(dir)
-        
+
         for p in directory:
             print(p)
             if path.isdir(f"{dir}/{p}"):
@@ -199,7 +209,6 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
                 del asset_dict[key]
 
         return asset_dict
-    
 
     def recCopyAssets(dir: str, asset_dict: dict):
         """
@@ -207,16 +216,14 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
         """
         if not path.exists(f"./{build_dir}/{dir}"):
             mkdir(f"./{build_dir}/{dir}")
-        
+
         for key in asset_dict.keys():
             if type(asset_dict[key]) == dict:
                 recCopyAssets(f"{dir}/{key}", asset_dict[key])
             else:
                 print(f"Copying ./{source_dir}/{dir}/{key}...")
-                copyfile(f"./{source_dir}/{dir}/{key}",
-                         f"./{build_dir}/{dir}/{key}")
+                copyfile(f"./{source_dir}/{dir}/{key}", f"./{build_dir}/{dir}/{key}")
         return
-
 
     print(include)
     assets = recRegisterAssets(f"./{source_dir}")
@@ -228,5 +235,3 @@ def build(clean: Annotated[bool, typer.Option(help="Remove existing build folder
     else:
         print("No assets found")
     return
-
-

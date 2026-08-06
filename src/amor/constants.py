@@ -1,28 +1,28 @@
 # Default configuration
 default_conf = {
-            "project": {
-                "name": "",
-                "version": "0.0.1",
-                "author": "",
-                "description": "",
-                "license": "",
-                "love_version": "",
-                "lua_version": "5.4",
-                "source_dir": "src",
-                "build_dir": "build",
-                "entry": "main.lua",
-                },
-            "build": {
-                "include": [
-                    "*.png",
-                    ],
-                },
-            "scripts": {
-                "test": "echo \"Hello, World!\"",
-                "build": "echo \"No build script defined!\"",
-                },
-            "dependencies": {},
-            }
+    "project": {
+        "name": "",
+        "version": "0.0.1",
+        "author": "",
+        "description": "",
+        "license": "",
+        "love_version": "",
+        "lua_version": "5.4",
+        "source_dir": "src",
+        "build_dir": "build",
+        "entry": "main.lua",
+    },
+    "build": {
+        "include": [
+            "*.png",
+        ],
+    },
+    "scripts": {
+        "test": 'echo "Hello, World!"',
+        "build": 'echo "No build script defined!"',
+    },
+    "dependencies": {},
+}
 
 # Default .luarc
 luarc = """\
@@ -86,8 +86,4 @@ package.loaded["{mod}"] = mod
 return mod
 """
 
-love_builtins = [
-        "enet",
-        "socket",
-        "utf8"
-        ]
+love_builtins = ["enet", "socket", "utf8"]
