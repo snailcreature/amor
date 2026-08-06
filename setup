@@ -44,17 +44,32 @@ python3 -m pip install -r requirements.txt
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "building amor..."
 
-if ! pyinstaller src/main.py --clean -n amor; then
+if ! pyinstaller src/main.py --clean --noconfirm -n amor; then
     printf "\n\e[1;91mSomething went wrong!\e[m\n"
     printf "\n\e[93mIf you did not trigger this, check the logs. Otherwise, try again when ready.\e[m\n\n"
     exit 1
 fi
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "amor built!"
-printf '\n\e[93m%-6s\e[m\n' "Adding the following path to your system PATH:"
 relative_path="dist/amor"
 absolute_path="$(pwd)/${relative_path}"
-printf "\n$absolute_path\n"
 
-echo "export PATH=$absolute_path:\$PATH" >> $HOME/.profile
-. "$HOME/.profile"
+. $HOME/.profile
+
+pattern=":$absolute_path:"
+case :$PATH: in
+    *$pattern*) 
+        printf '\n\e[93m%-6s\e[m\n' "$absolute_path already in PATH!"
+        ;;
+    *) 
+        printf '\n\e[93m%-6s\e[m\n' "Adding the following path to your system PATH:"
+        printf "$absolute_path\n"
+        echo "export PATH=$absolute_path:\$PATH" >> $HOME/.profile
+        printf "\$HOME/.profile updated"
+        ;;
+esac
+
+. $HOME/.profile
+
+printf "\nAll set up \e[1;52;49;91m❤\e[m\n\n"
+
