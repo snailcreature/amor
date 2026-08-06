@@ -14,6 +14,14 @@ format.
 
 ***
 
+## [0.5.0] - UNRELEASED
+
+### Changed
+ - Updated `setup` script to append amor to system PATH automatically
+ - Switched to [`uv`](https://docs.astral.sh/uv/) package manager
+
+***
+
 ## [0.4.0] - 2025-08-02
 
 ### Changed
