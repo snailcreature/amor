@@ -16,9 +16,20 @@ format.
 
 ## [0.5.0] - UNRELEASED
 
+### Added
+
+ - justfile for common development tasks
+ - `workspace.library` entry to default `.luarc.json` so that PATH does not need updating to field local Lua directories
+
 ### Changed
- - Updated `setup` script to append amor to system PATH automatically
+
  - Switched to [`uv`](https://docs.astral.sh/uv/) package manager
+ - Moved to [Typer](https://typer.tiangolo.com/) for CLI tooling, away from argparse
+ - Updated `setup` to use `pip wheel` to build and install amor CLI
+
+### Removed
+
+ - PyInstaller dependency
 
 ***
 

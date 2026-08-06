@@ -44,15 +44,19 @@ printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "building amor..."
 
 rm -rf ./dist/*
 
+# Append project directory at build-time as `pip wheel` requires absolute paths
 read -d '' reqs <<EOF
 $(< requirements.txt)
 -e file://$(pwd)
 EOF
 echo "$reqs" > _requirements.txt
 
+# no-require-hashes is needed since the project directory is a dependency but
+# does not have a hash
 if ! python3 -m pip wheel -r _requirements.txt --no-require-hashes -w dist; then
     printf "\n\e[1;91mSomething went wrong!\e[m\n"
-    printf "\n\e[93mIf you did not trigger this, check the logs. Otherwise, try again when ready.\e[m\n\n"
+    printf "\n\e[93mIf you did not trigger this, check the logs. \
+        Otherwise, try again when ready.\e[m\n\n"
     exit 1
 fi
 
@@ -62,8 +66,11 @@ printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "amor built!"
 
 wheel=$(ls dist | grep -E "^amor(.*)\.whl$")
 
+printf '\n\e[1;92m%-6s\e[m\n' "Installing amor..."
+
 python3 -m pip install ./dist/$wheel
 
 amor --install-completion
 
-printf "\nAll set up \e[1;52;49;91m❤\e[m\n\n"
+printf "\nAll set up \e[1;52;49;91m❤\e[m\n"
+amor --help
