@@ -51,13 +51,10 @@ if ! pyinstaller src/main.py --clean -n amor; then
 fi
 
 printf '\n\e[1;92m%-6s \e[1;52;49;91m❤\e[m\n' "amor built!"
-printf '\n\e[93m%-6s\e[m\n' "Add the following path to your system PATH:"
+printf '\n\e[93m%-6s\e[m\n' "Adding the following path to your system PATH:"
 relative_path="dist/amor"
 absolute_path="$(pwd)/${relative_path}"
 printf "\n$absolute_path\n"
 
-printf '\n\e[93m%-6s\e[m\n' "Add the following to your system LUA_PATH:"
-printf "\n./.amor/?/init.lua;./.amor/?/?.lua;\n"
-
-printf '\n\e[93m%-6s\e[m\n' "Add the following to your system LUA_CPATH:"
-printf "\n./.amor/?/?.so;\n\n"
+echo "export PATH=$absolute_path:\$PATH" >> $HOME/.profile
+. "$HOME/.profile"
