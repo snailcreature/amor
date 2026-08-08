@@ -25,7 +25,7 @@ def new(
     from toml import dump
     from git import Repo
 
-    from constants import (
+    from .constants import (
         default_conf,
         main_lua_content,
         gitignore_lines,

@@ -1,3 +1,5 @@
+from .__init__ import __version__
+
 # Default configuration
 default_conf = {
     "project": {
@@ -11,6 +13,7 @@ default_conf = {
         "source_dir": "src",
         "build_dir": "build",
         "entry": "main.lua",
+        "amor_version": __version__,
     },
     "build": {
         "include": [
@@ -27,13 +30,13 @@ default_conf = {
 # Default .luarc
 luarc = """\
 {
-    "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+    "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
     "runtime": {
         "version": "Lua 5.4"
     },
     "workspace": {
-        "library": ["${workspaceFolder:.amor}"],
-    },
+        "library": ["${workspaceFolder}/.amor/"]
+    }
 }
 """.splitlines(keepends=True)
 

@@ -29,7 +29,7 @@ def init(
     from git import Repo
     from os import listdir
 
-    from constants import default_conf, gitignore_lines, gitattributes_lines, luarc
+    from .constants import default_conf, gitignore_lines, gitattributes_lines, luarc
 
     with open("amor.toml", "r") as conf:
         amor_conf: dict = load(conf)

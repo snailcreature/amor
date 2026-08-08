@@ -15,7 +15,6 @@ def run(script: Annotated[str, typer.Argument(help="Name of script to run.")]):
     from toml import load
     from subprocess import PIPE, run as cmd
 
-    script = script
     with open("amor.toml", "r") as conf:
         amor_conf: dict = load(conf)
 

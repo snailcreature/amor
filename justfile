@@ -3,15 +3,15 @@ set default-list := true
 # Export the current project's requirements into a requirements.txt without the
 # current directory
 requirements:
-    uv export --format requirements.txt | grep -vE "-e \." > requirements.txt 
+    uv export --format requirements.txt --no-hashes --fork-strategy requires-python --no-dev --no-build --no-emit-project > requirements.txt 
 
 # Shortcut for running the setup script. Yes, I'm lazy
 setup:
     bash setup
     
 # Quickly uninstall amor for testing
-uninstall:
-    python3 -m pip uninstall amor -y
+uninstall version="3":
+    python{{ version }} -m pip uninstall amor -y
 
 # Very lazy format command
 fmt:
@@ -27,3 +27,8 @@ sync args="":
 activate:
     #!/usr/bin/env bash
     . ./.venv/bin/activate
+
+upgrade-pip version="3":
+    python{{ version }} -m pip install --upgrade pip setuptools
+
+dev: (uninstall "3.14") setup

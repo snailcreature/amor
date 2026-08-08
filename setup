@@ -53,10 +53,18 @@ echo "$reqs" > _requirements.txt
 
 # no-require-hashes is needed since the project directory is a dependency but
 # does not have a hash
-if ! python3 -m pip wheel -r _requirements.txt --no-require-hashes -w dist; then
-    printf "\n\e[1;91mSomething went wrong!\e[m\n"
-    printf "\n\e[93mIf you did not trigger this, check the logs.\nOtherwise, try again when ready.\e[m\n\n"
-    exit 1
+if ! python3.14 --version; then
+    if ! python3 -m pip wheel -r _requirements.txt --no-cache -w dist; then
+        printf "\n\e[1;91mSomething went wrong!\e[m\n"
+        printf "\n\e[93mIf you did not trigger this, check the logs.\nOtherwise, try again when ready.\e[m\n\n"
+        exit 1
+    fi
+else
+    if ! python3.14 -m pip wheel -r _requirements.txt --no-cache -w dist; then
+        printf "\n\e[1;91mSomething went wrong!\e[m\n"
+        printf "\n\e[93mIf you did not trigger this, check the logs.\nOtherwise, try again when ready.\e[m\n\n"
+        exit 1
+    fi
 fi
 
 rm -f _requirements.txt
@@ -67,8 +75,11 @@ wheel=$(ls dist | grep -E "^amor(.*)\.whl$")
 
 printf '\n\e[1;92m%-6s\e[m\n' "Installing amor..."
 
-python3 -m pip install ./dist/$wheel
-
+if ! python3.14 --version; then
+    python3 -m pip install ./dist/$wheel
+else
+    python3.14 -m pip install ./dist/$wheel
+fi
 amor --install-completion
 
 printf "\nAll set up \e[1;52;49;91m❤\e[m\n"

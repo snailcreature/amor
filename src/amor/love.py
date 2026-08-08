@@ -21,11 +21,11 @@ def love():
     cwd = getcwd()
     lua_env = environ.copy()
     lua_env["LUA_PATH"] = (
-        f"?;?.lua;{cwd}/{build_dir}/?/init.lua;{cwd}/{build_dir}/?.lua;\
-            {lua_env['LUA_PATH']}"
+        f"./?;./?.lua;{cwd}/{build_dir}/?/init.lua;{cwd}/{build_dir}/?.lua;\
+{cwd}/{build_dir}/?/?.lua;{cwd}/{build_dir}/ext/?/?.lua;{lua_env['LUA_PATH']}"
     )
     lua_env["LUA_CPATH"] = (
-        f"?;?.so;{cwd}/{build_dir}/?.so;{cwd}/{build_dir}/?/?.so;{lua_env['LUA_CPATH']}"
+        f"./?;./?.so;{cwd}/{build_dir}/?.so;{cwd}/{build_dir}/?/?.so;{lua_env['LUA_CPATH']}"
     )
 
     res = cmd(["love", build_dir], stdout=PIPE, text=True, env=lua_env)

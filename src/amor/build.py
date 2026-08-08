@@ -1,4 +1,5 @@
 from typing import Annotated
+import typing
 
 import typer
 
@@ -18,12 +19,13 @@ def build(
     (Aliases: `b`)
     """
     from toml import load
-    from os import path, mkdir, listdir
+    from os import path, mkdir, listdir, getcwd
     from luaparser import ast, astnodes
     from pickle import load as pload, dump as pdump
     from shutil import rmtree, copytree, copyfile
     from fnmatch import fnmatch
     from re import sub
+    from rich import print
 
     try:
         from lupa.lua54 import LuaRuntime
@@ -36,8 +38,9 @@ def build(
             except ImportError:
                 from lupa.lua51 import LuaRuntime
 
-    from constants import init_lua_template_so, init_lua_template_lua, love_builtins
+    from .constants import init_lua_template_so, init_lua_template_lua, love_builtins
 
+    # Get configs
     with open("amor.toml", "r") as conf_file:
         conf = load(conf_file)
 
@@ -46,13 +49,17 @@ def build(
     entry = conf["project"]["entry"]
     include = conf["build"]["include"]
 
-    lua = LuaRuntime()
+    lua = LuaRuntime(unpack_returned_tuples=False)
 
+    cwd = getcwd()
     lpath = lua.eval("package.path")
     cpath = lua.eval("package.cpath")
-    lua_path = f"./.amor/?.lua;./{source_dir}/?.lua;./.amor/?/init.lua;{str(lpath)};"
-    lua_cpath = f";./.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{str(cpath)};"
+    lua_path = f"./.amor/?.lua;./.amor/?/init.lua;./.amor/?/?.lua;./{source_dir}/?.lua;\
+            ./{source_dir}/?/init.lua;./{source_dir}/?/?.lua;{lpath}"
+    lua_cpath = f"{cwd}/.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{cpath}"
 
+    print(lua.eval("os.getenv('PWD')"))
+    # print(lua_path)
     if clean:
         rmtree(f"./{build_dir}")
 
@@ -66,35 +73,48 @@ def build(
         with open(file_path, "r") as src_file:
             lua_code = "".join(src_file.readlines())
 
-        lua_ast = ast.parse(lua_code)
+        # Parse the code into an AST
+        lua_ast: ast.Chunk = ast.parse(lua_code)
 
-        for node in ast.walk(lua_ast):  # type: ignore
+        node: ast.Node | None
+        for node in ast.walk(lua_ast):
+            # Function call
             if isinstance(node, astnodes.Call):
-                node: astnodes.Call = node
-                if isinstance(node.func, astnodes.Name):
-                    func: astnodes.Name = node.func  # type: ignore
+                call_node: astnodes.Call = typing.cast(astnodes.Call, node)
+                # Function has name
+                if isinstance(call_node.func, astnodes.Name):
+                    func: astnodes.Name = typing.cast(astnodes.Name, call_node.func)
 
+                    # It's a require function
                     if func.id == "require":
-                        mod: astnodes.String = node.args[0]  # type: ignore
-
-                        res = lua.eval(
-                            f'package.searchpath("{mod.s}",\
+                        # Module name will be first arg in the function
+                        mod: astnodes.String = call_node.args[0]
+                        if mod.raw in love_builtins:
+                            print(f"{mod.raw} included with Love")
+                            continue
+                        # Search the path for this module
+                        res: (str, None) | (None, str) = lua.eval(
+                            f'package.searchpath("{mod.raw}",\
                                 "{lua_path + lua_cpath}")'
                         )
-                        if "(None," in str(res):
-                            if mod.s in love_builtins:
-                                print(f"{mod.s} included with Love")
+
+                        print(res[0], "\n", res[1])
+                        if res[0] is None:
+                            if mod.raw in love_builtins:
+                                print(f"{mod.raw} included with Love")
                             else:
-                                print(f"Could not find {mod.s}")
+                                print(f"Could not find {mod.raw}")
                             continue
 
-                        mod_map[mod.s] = str(res)
+                        mod_map[mod.raw] = res
 
+        # Save the found modules to .dat file
         split_path = file_path.split("/")
         bld_path = "/".join(["./.bld"] + split_path[2:]).replace(".lua", ".dat")
         if len(split_path) > 2 and not split_path[1].endswith(".lua"):
             for i in range(2, len(split_path) - 1):
                 tmp = "/".join(split_path[2 : i + 1])
+                # Save the dat file to the bld folder
                 if not path.exists(f"./.bld/{tmp}"):
                     mkdir(f"./.bld/{tmp}")
 
@@ -122,6 +142,7 @@ def build(
     if not path.exists(f"./{build_dir}/ext"):
         mkdir(f"./{build_dir}/ext")
 
+    # Copy the source files to build dir
     for key in mod_map.keys():
         if not f"./{source_dir}/" in mod_map[key]:
             copy_path = mod_map[key].split("/")[:-1]
@@ -132,16 +153,18 @@ def build(
             copytree("/".join(copy_path), f"./{build_dir}/ext/{mod_dir}")
             print("Copied", mod_map[key])
             no_init = "init.lua" not in listdir(f"./{build_dir}/ext/{mod_dir}")
+            # If there module is a *.so, create an init
             if mod_map[key].endswith(".so"):
                 init_lua_content = init_lua_template_so.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
-                print("Wrote init.lua for *.so")
+                print(f"Wrote init.lua for {mod_dir}.so")
+            # If there's no init, rename the main source file
             elif no_init:
                 init_lua_content = init_lua_template_lua.replace("{mod}", key)
                 with open(f"./{build_dir}/ext/{mod_dir}/init.lua", "w") as init_file:
                     init_file.writelines(init_lua_content.splitlines(keepends=True))
-                print("Wrote init.lua for *.lua")
+                print(f"Wrote init.lua for {mod_dir}.lua")
 
     def recCompile(directory: str):
         """
@@ -152,10 +175,11 @@ def build(
         for dir in dir_list:
             full_path = directory + "/" + dir
             if path.isdir(full_path):
+                print(full_path)
                 recCompile(full_path)
             else:
                 with open(full_path, "rb") as dat:
-                    tree = pload(dat)
+                    tree: ast.Chunk = pload(dat)
 
                 comped = ast.to_lua_source(tree)
 

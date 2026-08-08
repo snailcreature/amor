@@ -46,7 +46,7 @@ present, but does not exist on repository, the most current version will be inst
             except ImportError:
                 from lupa.lua51 import LuaRuntime
 
-    from utils import (
+    from .utils import (
         getRepoHeadHash,
         getRepoTagHashes,
         include_patterns,
