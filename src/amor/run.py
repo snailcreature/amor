@@ -5,10 +5,12 @@ import typer
 app = typer.Typer()
 
 
+@app.command("r", hidden=True)
 @app.command()
 def run(script: Annotated[str, typer.Argument(help="Name of script to run.")]):
     """
     Run a given script name from the project amor.toml.
+    (Aliases: `r`)
     """
     from toml import load
     from subprocess import PIPE, run as cmd

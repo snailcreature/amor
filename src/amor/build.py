@@ -5,14 +5,17 @@ import typer
 app = typer.Typer()
 
 
+@app.command("b", hidden=True)
 @app.command()
 def build(
     clean: Annotated[
-        bool, typer.Option(help="Remove existing build folder contents.")
+        bool,
+        typer.Option("--clean/", "-c/", help="Remove existing build folder contents."),
     ] = False,
 ):
     """
     Build project into single directory for Löve.
+    (Aliases: `b`)
     """
     from toml import load
     from os import path, mkdir, listdir

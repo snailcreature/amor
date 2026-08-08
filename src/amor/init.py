@@ -11,10 +11,15 @@ def init(
         str | None, typer.Argument(help="The name of the project.")
     ] = None,
     force: Annotated[
-        bool, typer.Option(help="Force the creation of a fresh amor.toml config file.")
+        bool,
+        typer.Option(
+            "--force/",
+            "-f/",
+            help="Force the creation of a fresh amor.toml config file.",
+        ),
     ] = False,
     no_git: Annotated[
-        bool, typer.Option(help="Do not initialise git in project")
+        bool, typer.Option("--git-init/", "-g/", help="Initialise git in project")
     ] = False,
 ):
     """

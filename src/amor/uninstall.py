@@ -5,22 +5,26 @@ import typer
 app = typer.Typer()
 
 
+@app.command("u", hidden=True)
+@app.command("remove", hidden=True)
 @app.command()
 def uninstall(
-    module: Annotated[
+    modules: Annotated[
         list[str],
         typer.Argument(
-            help="Module(s) to\
-        uninstall, given in format `<module_name>` (as you would require\
-        in a Lua script)."
+            min=1,
+            help="""
+Module(s) to uninstall, given in format `<module_name>` (as you would require \
+in a Lua script).""",
         ),
     ],
 ):
     """
     Uninstall the given module(s) from the project.
+    (Aliases: `u`, `remove`)
     """
 
-    if len(module) == 0:
+    if len(modules) == 0:
         print("You must provide at least 1 module to uninstall.")
         raise typer.Exit()
 
@@ -32,7 +36,7 @@ def uninstall(
 
     deps: dict[str, str] = conf["dependencies"]
 
-    to_delete: list[str] = [dep for dep in deps if dep in module]
+    to_delete: list[str] = [dep for dep in deps if dep in modules]
 
     for dep in to_delete:
         print(f"Uninstalling {dep}")

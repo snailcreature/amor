@@ -1,22 +1,39 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
-from src.new import app as newOpt
-from src.init import app as initOpt
-from src.install import app as installOpt
-from src.uninstall import app as uninstallOpt
-from src.run import app as runOpt
-from src.build import app as buildOpt
-from src.love import app as loveOpt
-
-# amor version
-__version__ = "0.5.0"
-__author__ = "Sam Drage (github: snailcreature)"
-__date__ = "2026-08-06"
+from src.amor.new import app as newOpt
+from src.amor.init import app as initOpt
+from src.amor.install import app as installOpt
+from src.amor.uninstall import app as uninstallOpt
+from src.amor.run import app as runOpt
+from src.amor.build import app as buildOpt
+from src.amor.love import app as loveOpt
+from src.amor import __version__
 
 app = typer.Typer(
-    no_args_is_help=True, help="A package manager for the Löve game engine."
+    no_args_is_help=False, help="A package manager for the Löve game engine."
 )
+
+
+@app.callback(invoke_without_command=True)
+def callback(
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version/",
+            "-v/",
+            is_eager=True,
+            help="Display the current version of amor",
+        ),
+    ] = False,
+):
+    """
+    Display the current amor version.
+    """
+    if version:
+        print(f"amor {__version__}")
+        raise typer.Exit()
+
 
 app.add_typer(newOpt)
 app.add_typer(initOpt)
@@ -25,15 +42,6 @@ app.add_typer(uninstallOpt)
 app.add_typer(runOpt)
 app.add_typer(buildOpt)
 app.add_typer(loveOpt)
-
-
-@app.command()
-def version():
-    """
-    Display the current amor version.
-    """
-    print(f"amor {__version__}")
-
 
 if __name__ == "__main__":
     app()

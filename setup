@@ -55,8 +55,7 @@ echo "$reqs" > _requirements.txt
 # does not have a hash
 if ! python3 -m pip wheel -r _requirements.txt --no-require-hashes -w dist; then
     printf "\n\e[1;91mSomething went wrong!\e[m\n"
-    printf "\n\e[93mIf you did not trigger this, check the logs. \
-        Otherwise, try again when ready.\e[m\n\n"
+    printf "\n\e[93mIf you did not trigger this, check the logs.\nOtherwise, try again when ready.\e[m\n\n"
     exit 1
 fi
 

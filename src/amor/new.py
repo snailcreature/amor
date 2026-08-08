@@ -10,11 +10,12 @@ def new(
     name: Annotated[
         str,
         typer.Argument(
-            help="The name of the project. A directory with thtis name will be created."
+            help="The name of the project. A directory with this name will be created."
         ),
     ],
     no_git: Annotated[
-        bool, typer.Option(help="Do not initialise git in project")
+        bool,
+        typer.Option("--git-init/", "-g/", help="Initialise git in project"),
     ] = False,
 ):
     """

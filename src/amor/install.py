@@ -5,23 +5,29 @@ import typer
 app = typer.Typer()
 
 
+@app.command("i", hidden=True)
+@app.command("add", hidden=True)
 @app.command()
 def install(
     module: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Module(s) to install \
-from Github. Given in format '<username>/<repository>(@<tag>)'. \
+            help="""
+Module(s) to install from Github. Given in format '<username>/<repository>(@<tag>)'. \
 If <tag> is not present the most current version will be installed. If <tag> is \
-present, but does not exist on repository, the most current version will be installed."
+present, but does not exist on repository, the most current version will be installed."""
         ),
-    ],
+    ] = None,
     force: Annotated[
-        bool, typer.Option(help="Force the re-installation of all modules.")
+        bool,
+        typer.Option(
+            "--force/", "-f/", help="Force the re-installation of all modules."
+        ),
     ] = False,
 ):
     """
     Install given repositor(y/ies) or all repositories in the project amor.toml.
+    (Aliases: `i`, `add`)
     """
     from os import listdir, path, getcwd, environ
     from shutil import rmtree, copytree

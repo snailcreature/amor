@@ -23,3 +23,7 @@ healthcheck:
 
 sync args="":
     uv sync --exclude-newer="1 week" {{ args }}
+
+activate:
+    #!/usr/bin/env bash
+    . ./.venv/bin/activate
