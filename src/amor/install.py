@@ -1,6 +1,7 @@
 from typing import Annotated
-
 import typer
+
+from amor.types import AmorConfig, AmorConfigDependency, AmorLock, AmorLockEntry
 
 app = typer.Typer()
 
@@ -29,11 +30,14 @@ present, but does not exist on repository, the most current version will be inst
     Install given repositor(y/ies) or all repositories in the project amor.toml.
     (Aliases: `i`, `add`)
     """
+    import re
     from os import listdir, path, getcwd, environ
     from shutil import rmtree, copytree
     from toml import load, dump
     from git import Repo
     from subprocess import PIPE, run as cmd
+    from .utils import github_url_split_regex
+    from typing import cast
 
     try:
         from lupa.lua54 import LuaRuntime
@@ -46,14 +50,14 @@ present, but does not exist on repository, the most current version will be inst
             except ImportError:
                 from lupa.lua51 import LuaRuntime
 
-    from .utils import (
+    from utils import (
         getRepoHeadHash,
         getRepoTagHashes,
         include_patterns,
         remove_empty_dirs,
     )
 
-    hashes = {}
+    hashes: dict[str, str] = {}
 
     modules = []
     if module != None:
@@ -66,22 +70,41 @@ present, but does not exist on repository, the most current version will be inst
             except:
                 print(f"Failed to delete {dir}")
 
+    with open("amor.lock", "r") as amor_lock:
+        lock: AmorLock = load(amor_lock)
+
     if len(modules) == 0:
         print("Installing from amor.toml...")
         with open("amor.toml", "r") as amor_conf:
-            conf = load(amor_conf)
+            conf: AmorConfig = cast(AmorConfig, load(amor_lock))
 
-        found_mods: dict[str, str] = conf["dependencies"]
-        for mod in found_mods.keys():
-            if path.exists(f"./.amor/{mod}"):
-                print(f"{mod} already installed!")
-                continue
+        for mod in conf["dependencies"].keys():
+            entry = conf["dependencies"][mod]
+            locked: AmorLockEntry | None = lock[mod]
+            version: str
+            repo: str
+            if locked is None:
+                if type(entry) is str:
+                    print(f"Please provide a source for {mod} in your amor.toml")
+                    print(f"Skipping {mod}")
+                    continue
+                else:
+                    if entry["src"] is not None:
+                        author, proj = re.split(github_url_split_regex, entry["src"])
+                        repo = f"{author}/{proj}"
+                    else:
+                        print(f"Please provide a source for {mod} in your amor.toml")
+                        print(f"Skipping {mod}")
+                        continue
 
-            mod_name, mod_hash = conf["dependencies"][mod].split("=")
-            modules.append(mod_name)
-            mod_name = mod_name.split("@")[0]
-            hashes[mod_name] = mod_hash
-            print(mod_name, mod_hash)
+                    version = entry["src"] or "None"
+
+            else:
+                author = locked["author"]
+                repo = f"{author}/{mod}"
+                version = locked["version"] or "None"
+            modules.append(f"{repo}@{version}")
+            print(f"{repo}@{version}")
 
     for package in modules:
         print("Installing", package + "...")
@@ -92,7 +115,7 @@ present, but does not exist on repository, the most current version will be inst
         repo = package
         if "@" in package:
             repo, tag = package.split("@")
-        mod_name = repo.split("/")[-1]
+        mod_name, mod_author = repo.split("/")
 
         if tag == "None":
             tag = None
@@ -100,7 +123,7 @@ present, but does not exist on repository, the most current version will be inst
         git_url = f"https://github.com/{repo}.git"
         tags = getRepoTagHashes(git_url)
 
-        hash = ""
+        hash: str
         if tag != None and tag in tags.keys():
             hash = tags[tag]
         else:
@@ -109,10 +132,11 @@ present, but does not exist on repository, the most current version will be inst
 
         if len(hashes.keys()) > 0:
             try:
-                r = Repo.clone_from(git_url, to_path="./.amor/tmp/")
+                r = Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag)
                 r.index.reset(commit=hashes[repo], working_tree=True)
             except KeyError:
                 print("Something went wrong resetting the HEAD!")
+                print("Proceeding with cloned HEAD...")
         else:
             Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag, depth=1)
 
@@ -150,7 +174,7 @@ present, but does not exist on repository, the most current version will be inst
                     "if build and package then return { package = package,\
                                                            modules = build.modules} end\n"
                 )
-                lua = LuaRuntime()
+                lua = LuaRuntime(unpack_returned_tuples=False)
                 build_modules = dict(lua.execute("".join(rspec)))  # type: ignore
                 print(build_modules)
                 mods: list[str] = [mod for mod in build_modules["modules"]]  # type: ignore
@@ -174,6 +198,8 @@ present, but does not exist on repository, the most current version will be inst
                 if not has_package and not mismatch_module_name and len(mods) > 0:
                     print("fallback")
                     mod_name = mods[0]
+
+                mod_name = cast(str, mod_name)
 
                 if path.exists(f"./.amor/{mod_name}"):
                     rmtree(f"./.amor/{mod_name}")
@@ -251,15 +277,31 @@ present, but does not exist on repository, the most current version will be inst
         rmtree("./.amor/tmp")
 
         with open("amor.toml", "r") as amor_conf:
-            conf = load(amor_conf)
+            conf: AmorConfig = cast(AmorConfig, load(amor_conf))
 
         if conf["dependencies"] is None:
             conf["dependencies"] = {}
 
-        conf["dependencies"][mod_name] = f"{repo}@{tag}={hash}"
+        mod_entry: AmorConfigDependency | str
+        if tag is None:
+            mod_entry = {"src": git_url, "version": None}
+        else:
+            mod_entry = tag
+        mod_name = cast(str, mod_name)
+        conf["dependencies"][mod_name] = mod_entry
+
+        lock[mod_name] = {
+            "src": git_url,
+            "version": tag,
+            "hash": hash,
+            "author": mod_author,
+        }
 
         with open("amor.toml", "w") as amor_conf:
             dump(conf, amor_conf)
+
+        with open("amor.lock", "w") as amor_lock:
+            dump(lock, amor_lock)
 
         print(f"Installed {mod_name}!")
     return

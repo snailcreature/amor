@@ -1,5 +1,12 @@
 # Utility functions
 
+old_dep_regex = (
+    r"^[\w\d](?:[\w\d]|-(?=[a-z\d])){0,38}/[\w\.\-]+(\@(\d+\.)?(\d+\.)?(\*|\d+))?$"
+)
+old_dep_split_regex = r"([\w\d](?:[\w\d]|-(?=[a-z\d])){0,38}/)|([\w\.\-]+)|((\@(\d+\.)?(\d+\.)?(\*|\d+))?)"
+
+github_url_split_regex = r"(https?:\/\/(?:www\.)?github\.com\/)|\/|(\.git)"
+
 
 def getRepoTags(repo_url: str):
     """

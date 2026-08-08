@@ -1,7 +1,9 @@
+from amor.types import AmorConfig
+
 from .__init__ import __version__
 
 # Default configuration
-default_conf = {
+default_conf: AmorConfig = {
     "project": {
         "name": "",
         "version": "0.0.1",
