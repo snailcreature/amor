@@ -1,7 +1,5 @@
 import typer
 
-from amor.types import AmorConfigDependencies, AmorLock
-
 app = typer.Typer()
 
 
@@ -11,16 +9,28 @@ def migrate():
     Migrates the current project to a newer version of amor
     """
     from toml import load as tload, dump as tdump
-    from json import load as jload, dumps as jdumps
+    from json import load as jload, dump as jdump
     from os import path
     from typing import cast
-    from .types import AmorVersion
+    from re import split
+    from rich import print
+    from rich.progress import Progress
+    from .types import (
+        AmorConfigDependencies,
+        AmorLock,
+        AmorOldConfigDependency,
+        AmorVersion,
+    )
     from .__init__ import __version__
 
     with open("amor.toml", "r") as conf:
         amor_conf: dict = tload(conf)
 
-    current_version: AmorVersion = amor_conf["amor_version"]
+    try:
+        current_version: AmorVersion = amor_conf["amor_version"]
+    except KeyError:
+        current_version: AmorVersion = None
+
     if current_version is None:
         print("Detected version 0.4.0 or earlier...")
     else:
@@ -31,8 +41,11 @@ def migrate():
         match current_version:
             case None:
                 # Update .luarc.json
-                with open(".luarc.json", "r") as rc:
-                    luarc: dict = jload(rc)
+                try:
+                    with open(".luarc.json", "r") as rc:
+                        luarc: dict = jload(rc)
+                except:
+                    luarc: dict = {}
 
                 luarc["$schema"] = (
                     "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json"
@@ -50,23 +63,37 @@ def migrate():
                 deps = cast(dict[str, str], amor_conf["dependencies"])
                 new_deps: AmorConfigDependencies = {}
                 lock: AmorLock = {}
-                for mod in deps.keys():
-                    mod_name_tag, mod_hash = deps[mod].split("=")
-                    mod_author_name, mod_tag = mod_name_tag.split("@")
-                    new_deps[mod_author_name] = mod_tag
-                    mod_name, mod_author = mod_author_name.split("/")
-                    lock[mod_name] = {
-                        "version": mod_tag,
-                        "hash": mod_hash,
-                        "src": f"https://github.com/{mod_author_name}.git",
-                        "author": mod_author,
-                    }
+                module_split = r"\/|\@|\="
+                with Progress() as progress:
+                    task = progress.add_task(
+                        "Creating amor.lock...", total=len(deps.keys())
+                    )
+                    for mod in deps.keys():
+                        mod_author, mod_name, mod_tag, mod_hash = cast(
+                            AmorOldConfigDependency, split(module_split, deps[mod])
+                        )
+                        if mod_tag == "None":
+                            mod_tag = None
+                        lock[mod_name] = {
+                            "version": mod_tag,
+                            "hash": mod_hash,
+                            "src": f"https://github.com/{mod_author}/{mod_name}.git",
+                            "author": mod_author,
+                        }
+                        if mod_tag is None or mod_tag == "None":
+                            new_deps[mod_name] = {
+                                "src": f"https://github.com/{mod_author}/{mod_name}.git",
+                                "version": None,
+                            }
+                        else:
+                            new_deps[mod_name] = mod_tag
+                        progress.advance(task)
 
                 amor_conf["dependencies"] = new_deps
 
                 current_version = "0.5.0"
                 with open(".luarc.json", "w") as rc:
-                    rc.write(jdumps(luarc, indent=4))
+                    jdump(luarc, rc, indent=4)
 
                 with open("amor.lock", "w") as al:
                     tdump(lock, al)

@@ -31,4 +31,4 @@ activate:
 upgrade-pip version="3":
     python{{ version }} -m pip install --upgrade pip setuptools
 
-dev: (uninstall "3.14") setup
+dev: sync (uninstall "3.14") setup

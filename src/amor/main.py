@@ -8,6 +8,7 @@ from .uninstall import app as uninstallOpt
 from .run import app as runOpt
 from .build import app as buildOpt
 from .love import app as loveOpt
+from .migrate import app as migrateOpt
 from .__init__ import __version__
 
 app = typer.Typer(
@@ -21,11 +22,28 @@ app.add_typer(uninstallOpt)
 app.add_typer(runOpt)
 app.add_typer(buildOpt)
 app.add_typer(loveOpt)
+app.add_typer(migrateOpt)
 
 
-@app.command()
-def version():
+@app.callback(invoke_without_command=True)
+def callback(
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version/",
+            "-v/",
+            is_eager=True,
+            help="Display the current version of amor",
+        ),
+    ] = False,
+):
     """
     Display the current amor version.
     """
-    print(f"amor {__version__}")
+    if version:
+        print(f"amor {__version__}")
+        raise typer.Exit()
+
+
+if __name__ == "__main__":
+    app()

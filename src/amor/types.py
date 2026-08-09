@@ -2,6 +2,10 @@ from typing import Literal, NamedTuple, TypedDict
 
 type AmorVersion = Literal["0.5.0"] | Literal[None]
 
+type AmorInstallMod = tuple[str, str, str | None]  # author, repo, tag
+
+type AmorOldConfigDependency = tuple[str, str, str, str]  # author, repo, tag, hash
+
 
 class AmorConfigDependency(TypedDict):
     src: str | None

@@ -1,11 +1,29 @@
 # Utility functions
 
+
 old_dep_regex = (
     r"^[\w\d](?:[\w\d]|-(?=[a-z\d])){0,38}/[\w\.\-]+(\@(\d+\.)?(\d+\.)?(\*|\d+))?$"
 )
 old_dep_split_regex = r"([\w\d](?:[\w\d]|-(?=[a-z\d])){0,38}/)|([\w\.\-]+)|((\@(\d+\.)?(\d+\.)?(\*|\d+))?)"
 
-github_url_split_regex = r"(https?:\/\/(?:www\.)?github\.com\/)|\/|(\.git)"
+github_url_split_regex = r"(https?:\/\/(?:www\.)?github\.com\/)|(\/)|(\.git)"
+
+install_module_split = r"\/|\@"
+
+type GithubInfo = tuple[str, str]  # author, repo
+
+
+def get_gh_repo_info(url: str) -> GithubInfo:
+    from re import split, compile
+    from typing import cast
+
+    pattern = compile(github_url_split_regex)
+    info = split(pattern, url)
+    info = [i for i in info if i is not None and len(i) != 0]
+    info = [i for i in info if pattern.match(i) is None]
+    if info is None or len(info) != 2:
+        raise Exception(f"Incorrect format: {url} -> {info}")
+    return cast(GithubInfo, info)
 
 
 def getRepoTags(repo_url: str):
