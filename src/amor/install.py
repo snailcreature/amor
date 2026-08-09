@@ -145,9 +145,12 @@ present, but does not exist on repository, the most current version will be inst
         else:
             task = p.add_task("Processing modules...", total=len(module))
             for m in module:
-                author, package, tag = cast(
-                    AmorInstallMod, resplit(install_module_split, m)
-                )
+                gh_info = resplit(install_module_split, m)
+                if len(gh_info) == 3:
+                    author, package, tag = gh_info
+                else:
+                    author, package = gh_info
+                    tag = None
                 modules[package] = {
                     "src": f"https://github.com/{author}/{package}.git",
                     "version": tag,
@@ -177,19 +180,45 @@ present, but does not exist on repository, the most current version will be inst
                 hash = getRepoHeadHash(git_url)
             p.console.print(tag, hash)
             if tag is None:
-                print(f"{package} tag is None")
+                p.console.print(f"{package} tag is None")
             if tag == "None":
-                print(f"{package} tag is 'None'")
+                p.console.print(f"{package} tag is 'None'")
+
+            git_task = p.add_task(f"Cloning from {git_url}...", total=None)
+
+            def progress_callback(
+                opcode: int,
+                cur_count: str | float,
+                max_count: str | float | None = None,
+                message: str = "",
+            ) -> None:
+                if max_count is not None:
+                    p.update(git_task, total=float(max_count))
+                p.update(git_task, completed=float(cur_count))
 
             if len(hashes.keys()) > 0:
                 try:
-                    r = Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag)
-                    r.index.reset(commit=hashes[package], working_tree=True)
+                    r = Repo.clone_from(
+                        git_url,
+                        to_path="./.amor/tmp/",
+                        branch=tag,
+                        progress=progress_callback,
+                        quiet=True,
+                    )
+                    r.index.reset(commit=hashes[package], working_tree=True, quiet=True)
                 except KeyError:
                     p.console.print("Something went wrong resetting the HEAD!")
                     p.console.print("Proceeding with cloned HEAD...")
             else:
-                Repo.clone_from(git_url, to_path="./.amor/tmp/", branch=tag, depth=1)
+                Repo.clone_from(
+                    git_url,
+                    to_path="./.amor/tmp/",
+                    branch=tag,
+                    depth=1,
+                    progress=progress_callback,
+                    quiet=True,
+                )
+            p.remove_task(git_task)
 
             dir_content = listdir("./.amor/tmp")
             rockspecs = [file for file in dir_content if file.endswith(".rockspec")]
@@ -214,7 +243,7 @@ present, but does not exist on repository, the most current version will be inst
                     )
 
                     for line in res.stdout.splitlines():
-                        console.print(line)
+                        p.console.print(line)
 
                     res.check_returncode()
 
@@ -232,7 +261,7 @@ present, but does not exist on repository, the most current version will be inst
                     build_package: str | None = build_modules["package"]  # type: ignore
 
                     p.console.print(*mods)
-                    console.print(build_modules["package"])  # type: ignore
+                    p.console.print(build_modules["package"])  # type: ignore
                     has_package = build_package is not None
                     renamed_mod = list(filter(lambda m: "." not in m, mods))
                     mismatch_module_name = (
@@ -303,7 +332,7 @@ present, but does not exist on repository, the most current version will be inst
                     )
 
                     for line in res.stdout.splitlines():
-                        print(line)
+                        p.console.print(line)
 
                     res.check_returncode()
                     built_from_makefile = True

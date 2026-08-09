@@ -24,6 +24,7 @@ in a Lua script).""",
     (Aliases: `u`, `remove`)
     """
     from rich import print
+    from rich.progress import Progress
 
     if len(modules) == 0:
         print("[red]You must provide at least 1 module to uninstall.")
@@ -43,25 +44,33 @@ in a Lua script).""",
     to_delete: list[str] = [dep for dep in deps.keys() if dep in modules]
     lock_clean: list[str] = [dep for dep in lock.keys() if dep not in deps.keys()]
 
-    for dep in to_delete:
-        print(f"Uninstalling {dep}")
-        try:
-            rmtree(f"./.amor/{dep}")
-
-            del conf["dependencies"][dep]
-            del lock[dep]
-        except:
-            print(f"[red]Failed to uninstall {dep}.")
-
-    if len(lock_clean) > 0:
-        print("Cleaning up lock file...")
-        for dep in lock_clean:
+    with Progress() as p:
+        del_task = p.add_task("Uninstalling...", total=len(to_delete))
+        for dep in to_delete:
+            p.print(f"[blue]Uninstalling {dep}...")
             try:
                 rmtree(f"./.amor/{dep}")
 
+                del conf["dependencies"][dep]
                 del lock[dep]
+                p.print(f"[green]Uninstalled {dep}!")
             except:
-                print(f"[red]Failed to clean {dep}.")
+                p.print(f"[red]Failed to uninstall {dep}.")
+            p.advance(del_task)
+
+        if len(lock_clean) > 0:
+            clean_task = p.add_task("Cleaning up amor.lock...", total=len(lock_clean))
+            for dep in lock_clean:
+                try:
+                    rmtree(f"./.amor/{dep}")
+
+                    del lock[dep]
+                    p.print(f"[green]Removed {dep} from amor.lock!")
+                except:
+                    p.print(f"[red]Failed to clean {dep}.")
+                p.advance(clean_task)
+            p.remove_task(clean_task)
+        p.remove_task(del_task)
 
     with open("amor.toml", "w") as amor_conf:
         dump(conf, amor_conf)
