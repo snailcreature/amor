@@ -29,24 +29,42 @@ and some version of gnu-make be installed, along with Lua (5.4 preferred).
 This is a hobby project that is maintained by an individual. Please submit any
 bugs you find as Issues. Check [the Changelog](/CHANGELOG.md) before updating.
 
+## Requirements
+
+ - [Python3](https://www.python.org/downloads/) (Python 3.14 or later) - For amor itself
+ - [git](https://git-scm.com/) - For downloading packages
+ - [LuaRocks](https://luarocks.org/) - For building some packages
+ - [cmake](https://cmake.org/) - For building some other packages
+ - [Löve](https://www.love2d.org/) - For making your game
+
 ## Setup
+
+To run the automatic install script:
+
+```shell
+curl --proto '=https' -sSf https://raw.githubusercontent.com/snailcreature/amor/refs/heads/main/install.sh | bash
+```
+
+Installs the amor source to `~/.local/share/amor`.
+
+Subsequent runs of this script will produce a fresh installation.
+
+### Manual Install
 
 Clone this repository then run
 
 ```shell
-bash setup
+bash ./setup.sh
 ```
 
 or,
 
 ```shell
 chmod +x ./setup
-./setup
+./setup.sh
 ```
 
-This will create the standalone executable version of amor. Add the paths
-provided by the setup script to your system PATH to be able to run it from
-anywhere on your system.
+This will create the stand-alone executable version of amor and install it to your Python binaries, allowing you to run it anywhere.
 
 ## Usage
 
@@ -60,7 +78,7 @@ This will create a new project in the folder `my_project` with git initialised,
 along with a default `amor.toml` and `src` directory with a `main.lua`
 pre-configured with the core Löve functions (load, update, and draw).
 
-Run `amor -h` for a full list of commands and how to use them.
+Run `amor --help` for a full list of commands and how to use them.
 
 ## Updating
 
@@ -74,9 +92,14 @@ bash setup # or "./setup", if you ran "chmod +x ./setup" before
 Please check [the Changelog](/CHANGELOG.md) for breaking changes before
 updating.
 
+> [!IMPORTANT] Once you have updated, be sure to run `amor migrate` in any active projects. This will apply patches to bring a project up-to-date with the currently-installed
+> amor version
+
 ## Credits
 
 Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
+
+No AI was knowingly used in the research or creation of this tool.
 
 ## Roadmap
 
@@ -84,5 +107,7 @@ Example `tilemap.png` created by [Kenney](kenney.nl) (CC0).
 - [ ] Dev dependencies
 - [ ] Dependency execution
 - [ ] Non-Github installs
+    - [ ] Codeberg
+    - [ ] Forgejo
     - [ ] Gitlab
     - [ ] Luarocks

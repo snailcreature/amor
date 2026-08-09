@@ -7,7 +7,7 @@ requirements:
 
 # Shortcut for running the setup script. Yes, I'm lazy
 setup:
-    bash setup
+    bash setup.sh
     
 # Quickly uninstall amor for testing
 uninstall version="3":

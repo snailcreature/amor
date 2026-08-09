@@ -50,10 +50,10 @@ def migrate():
                 luarc["$schema"] = (
                     "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json"
                 )
-                if luarc["workspace"] is None:
+                if "workspace" not in luarc.keys():
                     luarc["workspace"] = {}
 
-                if luarc["workspace"]["library"] is None:
+                if "library" not in luarc["workspace"].keys():
                     luarc["workspace"]["library"] = []
 
                 if "${workspaceFolder}/.amor/" not in luarc["workspace"]["library"]:

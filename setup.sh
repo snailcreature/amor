@@ -82,5 +82,9 @@ else
 fi
 amor --install-completion
 
+printf "Adding AMOR_DIR to PATH..."
+
+bash ./amor_dir.sh
+
 printf "\nAll set up \e[1;52;49;91m❤\e[m\n"
 amor --help

@@ -9,6 +9,7 @@ lua_version = "5.4"
 source_dir = "src"
 build_dir = "build"
 entry = "main.lua"
+amor_version = "0.5.0"
 
 [build]
 include = [ "*.png",]
@@ -17,6 +18,8 @@ include = [ "*.png",]
 test = "echo \"Hello, World!\""
 build = "echo \"No build script defined!\""
 
-[dependencies]
-zip = "matiasah/zip@None=f7808d24127e7ea8458c6045b61a69295e102ec5"
-lfs = "lunarmodules/luafilesystem@None=09511782201302ade916d4b250d01a6c61b56844"
+[dependencies.zip]
+src = "https://github.com/matiasah/zip.git"
+
+[dependencies.luafilesystem]
+src = "https://github.com/lunarmodules/luafilesystem.git"

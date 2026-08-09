@@ -20,6 +20,7 @@ format.
 
  - justfile for common development tasks
  - `workspace.library` entry to default `.luarc.json` so that PATH does not need updating to field local Lua directories
+ - `install.sh` script for automatically installing amor in `~/.local/share/amor`
 
 ### Changed
 

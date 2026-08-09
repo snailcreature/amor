@@ -95,7 +95,10 @@ present, but does not exist on repository, the most current version will be inst
             )
             for package in conf["dependencies"].keys():
                 entry = conf["dependencies"][package]
-                locked: AmorLockEntry | None = lock[package]
+                if package in lock.keys():
+                    locked: AmorLockEntry | None = lock[package]
+                else:
+                    locked = None
                 version: str | None
                 repo: str
                 src: str
@@ -108,17 +111,18 @@ present, but does not exist on repository, the most current version will be inst
                         p.advance(task)
                         continue
                     else:
-                        if entry["src"] is not None:
-                            author, proj = re.split(
+                        entry = cast(AmorLockEntry, entry)
+                        if "src" in entry.keys():
+                            author, proj = resplit(
                                 github_url_split_regex, entry["src"]
                             )
                             repo = f"{author}/{proj}"
                             src = entry["src"]
                         else:
                             p.console.print(
-                                f"Please provide a source for {mod} in your amor.toml"
+                                f"Please provide a source for {package} in your amor.toml"
                             )
-                            p.console.print(f"Skipping {mod}")
+                            p.console.print(f"Skipping {package}")
                             p.advance(task)
                             continue
 

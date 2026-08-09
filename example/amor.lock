@@ -1,0 +1,9 @@
+[zip]
+hash = "f7808d24127e7ea8458c6045b61a69295e102ec5"
+src = "https://github.com/matiasah/zip.git"
+author = "matiasah"
+
+[luafilesystem]
+hash = "09511782201302ade916d4b250d01a6c61b56844"
+src = "https://github.com/lunarmodules/luafilesystem.git"
+author = "lunarmodules"
