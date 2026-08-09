@@ -76,7 +76,7 @@ present, but does not exist on repository, the most current version will be inst
             try:
                 rmtree(f"./.amor/{dir}/")
             except:
-                print(f"Failed to delete {dir}")
+                print(f"[red]Failed to delete {dir}")
                 raise typer.Exit(1)
 
     with ropen("amor.lock", "r", description="Reading amor.lock...") as amor_lock:

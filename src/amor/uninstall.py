@@ -23,9 +23,10 @@ in a Lua script).""",
     Uninstall the given module(s) from the project.
     (Aliases: `u`, `remove`)
     """
+    from rich import print
 
     if len(modules) == 0:
-        print("You must provide at least 1 module to uninstall.")
+        print("[red]You must provide at least 1 module to uninstall.")
         raise typer.Exit()
 
     from toml import load, dump
@@ -34,9 +35,13 @@ in a Lua script).""",
     with open("amor.toml", "r") as amor_conf:
         conf = load(amor_conf)
 
+    with open("amor.lock", "r") as amor_lock:
+        lock = load(amor_lock)
+
     deps: dict[str, str] = conf["dependencies"]
 
-    to_delete: list[str] = [dep for dep in deps if dep in modules]
+    to_delete: list[str] = [dep for dep in deps.keys() if dep in modules]
+    lock_clean: list[str] = [dep for dep in lock.keys() if dep not in deps.keys()]
 
     for dep in to_delete:
         print(f"Uninstalling {dep}")
@@ -44,10 +49,24 @@ in a Lua script).""",
             rmtree(f"./.amor/{dep}")
 
             del conf["dependencies"][dep]
+            del lock[dep]
         except:
-            print(f"Failed to uninstall {dep}.")
+            print(f"[red]Failed to uninstall {dep}.")
+
+    if len(lock_clean) > 0:
+        print("Cleaning up lock file...")
+        for dep in lock_clean:
+            try:
+                rmtree(f"./.amor/{dep}")
+
+                del lock[dep]
+            except:
+                print(f"[red]Failed to clean {dep}.")
 
     with open("amor.toml", "w") as amor_conf:
         dump(conf, amor_conf)
+
+    with open("amor.lock", "w") as amor_lock:
+        dump(lock, amor_lock)
 
     return
