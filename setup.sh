@@ -82,7 +82,7 @@ else
 fi
 amor --install-completion
 
-printf "Adding AMOR_DIR to PATH..."
+printf "Adding AMOR_DIR to PATH...\n"
 
 bash ./amor_dir.sh
 

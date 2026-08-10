@@ -113,9 +113,7 @@ present, but does not exist on repository, the most current version will be inst
                     else:
                         entry = cast(AmorLockEntry, entry)
                         if "src" in entry.keys():
-                            author, proj = resplit(
-                                github_url_split_regex, entry["src"]
-                            )
+                            author, proj = resplit(github_url_split_regex, entry["src"])
                             repo = f"{author}/{proj}"
                             src = entry["src"]
                         else:

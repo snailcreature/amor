@@ -42,10 +42,7 @@ luarc = {
         ],
         "ignoreDir": ["./.amor/", "./build/"],
     },
-    "diagnostics": {
-        "ignoredFiles": "Disable",
-        "libraryFiles": "Disable"
-    },
+    "diagnostics": {"ignoredFiles": "Disable", "libraryFiles": "Disable"},
 }
 
 

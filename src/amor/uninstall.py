@@ -47,15 +47,15 @@ in a Lua script).""",
     with Progress() as p:
         del_task = p.add_task("Uninstalling...", total=len(to_delete))
         for dep in to_delete:
-            p.print(f"[blue]Uninstalling {dep}...")
+            p.console.print(f"[blue]Uninstalling {dep}...")
             try:
                 rmtree(f"./.amor/{dep}")
 
                 del conf["dependencies"][dep]
                 del lock[dep]
-                p.print(f"[green]Uninstalled {dep}!")
+                p.console.print(f"[green]Uninstalled {dep}!")
             except:
-                p.print(f"[red]Failed to uninstall {dep}.")
+                p.console.print(f"[red]Failed to uninstall {dep}.")
             p.advance(del_task)
 
         if len(lock_clean) > 0:
@@ -65,9 +65,9 @@ in a Lua script).""",
                     rmtree(f"./.amor/{dep}")
 
                     del lock[dep]
-                    p.print(f"[green]Removed {dep} from amor.lock!")
+                    p.console.print(f"[green]Removed {dep} from amor.lock!")
                 except:
-                    p.print(f"[red]Failed to clean {dep}.")
+                    p.console.print(f"[red]Failed to clean {dep}.")
                 p.advance(clean_task)
             p.remove_task(clean_task)
         p.remove_task(del_task)

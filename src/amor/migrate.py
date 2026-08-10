@@ -22,6 +22,7 @@ def migrate():
         AmorVersion,
     )
     from .__init__ import __version__
+    from .constants import luarc as default_luarc
 
     with open("amor.toml", "r") as conf:
         amor_conf: dict = tload(conf)
@@ -45,7 +46,7 @@ def migrate():
                     with open(".luarc.json", "r") as rc:
                         luarc: dict = jload(rc)
                 except:
-                    luarc: dict = {}
+                    luarc: dict = default_luarc
 
                 print("[blue]Updating .luarc.json...")
                 luarc["$schema"] = (
@@ -91,9 +92,16 @@ def migrate():
                         "Creating amor.lock...", total=len(deps.keys())
                     )
                     for mod in deps.keys():
-                        mod_author, mod_name, mod_tag, mod_hash = cast(
-                            AmorOldConfigDependency, split(module_split, deps[mod])
-                        )
+                        try:
+                            mod_author, mod_name, mod_tag, mod_hash = cast(
+                                AmorOldConfigDependency, split(module_split, deps[mod])
+                            )
+                        except:
+                            progress.console.print(
+                                f"[yellow]Failed to split dependency {mod}: {deps[mod]}"
+                            )
+                            continue
+
                         if mod_tag == "None":
                             mod_tag = None
                         lock[mod_name] = {
