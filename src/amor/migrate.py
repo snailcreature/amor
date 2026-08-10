@@ -32,10 +32,10 @@ def migrate():
         current_version: AmorVersion = None
 
     if current_version is None:
-        print("Detected version 0.4.0 or earlier...")
+        print("[blue]Detected version 0.4.0 or earlier...")
     else:
-        print(f"Detected version {current_version}...")
-    print(f"Migrating to version {__version__}")
+        print(f"[blue]Detected version {current_version}...")
+    print(f"[blue]Migrating to version {__version__}")
 
     while True:
         match current_version:
@@ -47,6 +47,7 @@ def migrate():
                 except:
                     luarc: dict = {}
 
+                print("[blue]Updating .luarc.json...")
                 luarc["$schema"] = (
                     "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json"
                 )
@@ -59,6 +60,9 @@ def migrate():
                 if "${workspaceFolder}/.amor/" not in luarc["workspace"]["library"]:
                     luarc["workspace"]["library"].append("${workspaceFolder}/.amor/")
 
+                if "${3rd}/love2d/" not in luarc["workspace"]["library"]:
+                    luarc["workspace"]["library"].append("${3rd}/love2d/")
+
                 if "ignoreDir" not in luarc["workspace"].keys():
                     luarc["workspace"]["ignoreDir"] = []
 
@@ -67,6 +71,15 @@ def migrate():
 
                 if "./.build/" not in luarc["workspace"]["ignoreDir"]:
                     luarc["workspace"]["ignoreDir"].append("./build/")
+
+                if "diagnostics" not in luarc.keys():
+                    luarc["diagnostics"] = {}
+
+                if "ignoredFiles" not in luarc["diagnostics"].keys():
+                    luarc["diagnostics"]["ignoredFiles"] = "Disable"
+
+                if "libraryFiles" not in luarc["diagnostics"].keys():
+                    luarc["diagnostics"]["libraryFiles"] = "Disable"
 
                 # Create amor.lock
                 deps = cast(dict[str, str], amor_conf["dependencies"])

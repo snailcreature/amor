@@ -1,4 +1,4 @@
-from typing import Literal, NamedTuple, TypedDict
+from typing import Literal, NamedTuple, Optional, TypedDict
 
 type AmorVersion = Literal["0.5.0"] | Literal[None]
 
@@ -18,9 +18,9 @@ type AmorConfigDependencies = dict[str, AmorConfigDependency | str]
 class AmorConfigProject(TypedDict):
     name: str
     version: str
-    author: str | None
+    author: Optional[str]
     description: str
-    license: str | None
+    license: Optional[str]
     love_version: Literal["11.5"]
     lua_version: Literal["5.4"] | Literal["5.3"] | Literal["5.2"] | Literal["5.1"]
     source_dir: str
@@ -43,7 +43,7 @@ class AmorConfig(TypedDict):
 class AmorLockEntry(TypedDict):
     src: str
     hash: str
-    version: str | None
+    version: Optional[str]
     author: str
 
 

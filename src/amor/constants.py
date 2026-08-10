@@ -1,4 +1,4 @@
-from amor.types import AmorConfig
+from .types import AmorConfig
 
 from .__init__ import __version__
 
@@ -36,8 +36,15 @@ luarc = {
         "version": "Lua 5.4",
     },
     "workspace": {
-        "library": ["${workspaceFolder}/.amor/"],
+        "library": [
+            "${workspaceFolder}/.amor/",
+            "${3rd}/love2d/",
+        ],
         "ignoreDir": ["./.amor/", "./build/"],
+    },
+    "diagnostics": {
+        "ignoredFiles": "Disable",
+        "libraryFiles": "Disable"
     },
 }
 

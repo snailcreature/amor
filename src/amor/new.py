@@ -13,7 +13,7 @@ def new(
             help="The name of the project. A directory with this name will be created."
         ),
     ],
-    no_git: Annotated[
+    git_init: Annotated[
         bool,
         typer.Option("--git-init/", "-g/", help="Initialise git in project"),
     ] = False,
@@ -24,6 +24,7 @@ def new(
     from os import mkdir, path
     from toml import dump
     from git import Repo
+    from rich import print
 
     from .constants import (
         default_conf,
@@ -35,7 +36,7 @@ def new(
 
     if name == ".":
         print(
-            "Please run `amor init` to start your project in the current\
+            "[yellow]Please run `amor init` to start your project in the current\
                 directory."
         )
         return
@@ -44,32 +45,32 @@ def new(
 
     conf["project"]["name"] = name
 
-    print("Making directory ./" + name + "...")
+    print("[blue]Making directory ./" + name + "...")
     mkdir("./" + name)
     mkdir("./" + name + "/src")
     with open("./" + name + "/src/main.lua", "w") as main_lua:
         main_lua.writelines(main_lua_content)
 
-    print("Creating ./" + name + "/amor.conf...")
+    print("[blue]Creating ./" + name + "/amor.conf...")
     with open("./" + name + "/amor.toml", "w") as conf_file:
         dump(conf, conf_file)
 
-    print("Creating ./" + name + "/.luarc.json...")
+    print("[blue]Creating ./" + name + "/.luarc.json...")
     with open(f"./{name}/.luarc.json", "w") as luarc_file:
         luarc_file.writelines(luarc)
 
-    if not no_git:
-        print("Creating .gitignore...")
+    if git_init:
+        print("[blue]Creating .gitignore...")
         with open("./" + name + "/.gitignore", "w") as gitignore:
             gitignore.writelines(gitignore_lines)
 
         with open("./" + name + "/.gitattributes", "w") as gitattributes:
             gitattributes.writelines(gitattributes_lines)
 
-        print("Initialising git repo...")
+        print("[blue]Initialising git repo...")
         repo = Repo.init(path.join(name))
-        repo.index.add([".gitignore", ".gitattributes", "amor.toml"])
+        repo.index.add([".gitignore", ".gitattributes", "amor.toml", ".luarc.json"])
         repo.index.commit("Initial commit")
 
-    print("New project", name, "created!")
+    print("[green]New project", name, "created!")
     return
