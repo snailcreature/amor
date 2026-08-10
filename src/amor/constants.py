@@ -7,10 +7,10 @@ default_conf: AmorConfig = {
     "project": {
         "name": "",
         "version": "0.0.1",
-        "author": "",
+        "author": None,
         "description": "",
-        "license": "",
-        "love_version": "",
+        "license": None,
+        "love_version": "11.5",
         "lua_version": "5.4",
         "source_dir": "src",
         "build_dir": "build",
@@ -30,17 +30,17 @@ default_conf: AmorConfig = {
 }
 
 # Default .luarc
-luarc = """\
-{
+luarc = {
     "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
     "runtime": {
-        "version": "Lua 5.4"
+        "version": "Lua 5.4",
     },
     "workspace": {
-        "library": ["${workspaceFolder}/.amor/"]
-    }
+        "library": ["${workspaceFolder}/.amor/"],
+        "ignoreDir": ["./.amor/", "./build/"],
+    },
 }
-""".splitlines(keepends=True)
+
 
 # Default .gitignore for projects
 gitignore_lines = """\

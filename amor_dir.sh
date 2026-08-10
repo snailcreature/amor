@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+. $HOME/.profile
+
 absolute_path=$(pwd)
 pattern=":$absolute_path:"
 case :$PATH: in
@@ -16,3 +18,5 @@ case :$PATH: in
         printf "\$HOME/.profile updated"
         ;;
 esac
+
+. $HOME/.profile

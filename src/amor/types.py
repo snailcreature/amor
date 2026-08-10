@@ -21,7 +21,7 @@ class AmorConfigProject(TypedDict):
     author: str | None
     description: str
     license: str | None
-    love_version: str
+    love_version: Literal["11.5"]
     lua_version: Literal["5.4"] | Literal["5.3"] | Literal["5.2"] | Literal["5.1"]
     source_dir: str
     build_dir: str

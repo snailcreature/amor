@@ -59,6 +59,15 @@ def migrate():
                 if "${workspaceFolder}/.amor/" not in luarc["workspace"]["library"]:
                     luarc["workspace"]["library"].append("${workspaceFolder}/.amor/")
 
+                if "ignoreDir" not in luarc["workspace"].keys():
+                    luarc["workspace"]["ignoreDir"] = []
+
+                if "./.amor/" not in luarc["workspace"]["ignoreDir"]:
+                    luarc["workspace"]["ignoreDir"].append("./.amor/")
+
+                if "./.build/" not in luarc["workspace"]["ignoreDir"]:
+                    luarc["workspace"]["ignoreDir"].append("./build/")
+
                 # Create amor.lock
                 deps = cast(dict[str, str], amor_conf["dependencies"])
                 new_deps: AmorConfigDependencies = {}

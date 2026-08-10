@@ -26,6 +26,7 @@ def init(
     Initialise an amor project in the current directory.
     """
     from toml import load, dump
+    from json import dump as jdump
     from git import Repo
     from os import listdir
 
@@ -54,7 +55,7 @@ def init(
     luarc_exists = ".luarc.json" in listdir("./")
     if not luarc_exists:
         with open(".luarc.json", "w") as luarc_file:
-            luarc_file.writelines(luarc)
+            jdump(luarc, luarc_file)
 
     if not no_git:
         print("Creating .gitignore...")
