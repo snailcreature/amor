@@ -1,0 +1,5 @@
+{
+    "$schema": "https://raw.githubusercontent.com/LuaLS/LLS-Addons/refs/heads/main/schemas/addon_config.schema.json",
+    "name": "socket",
+    "words": [ "socket%.%w+" ]
+}

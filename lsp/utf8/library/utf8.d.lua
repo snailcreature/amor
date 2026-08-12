@@ -17,7 +17,7 @@ utf8 = {}
 
 ---Receives zero or more integers, converts each one to its corresponding UTF-8
 ---byte sequence and returns a string with the concatenation of all these sequences.
----@param ... integer[]
+---@param ... integer
 ---@return string
 function utf8.char(...) end
 

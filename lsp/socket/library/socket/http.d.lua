@@ -1,0 +1,73 @@
+---@meta
+
+---@alias socket.http.methods # HTTP request methods
+--- | "GET" # Request a representation of the specified resource
+--- | "HEAD" # Identical to `GET` but without a response body
+--- | "POST" # Submit an entity to the specified resource, often causing a change of state
+--- | "PUT" # Replace all current representations of the target resource
+--- | "DELETE" # Delete the specified resource
+--- | "CONNECT" # Establish a tunnel to the server
+--- | "OPTIONS" # Describe the communication options for the target
+--- | "TRACE" # Perform a message loop-back test
+--- | "PATCH" # Partially modify the target resource
+
+---@class socket.http
+socket.http = {}
+
+---@class socket.http.headers
+---@field [string] string
+socket.http.headers = {}
+
+---Download URL using the `GET` or `POST` method as a string
+---@param url string
+---@param body string
+---@return [string, integer, socket.http.headers, string]|[nil, string]
+function socket.http.request(url, body) end
+
+---Performs any HTTP method and is LTN12 based.
+---
+---If the first argument of the request function is a string, it should be an url.
+---In that case, if a body is provided as a string, the function will perform a
+---POST method in the url. Otherwise, it performs a GET in the url
+---
+---If the first argument is instead a table, the most important fields are the url 
+---and the simple LTN12 sink that will receive the downloaded content. Any part
+---of the url can be overridden by including the appropriate field in the request
+---table. If authentication information is provided, the function uses the Basic
+---Authentication Scheme (see note) to retrieve the document. If sink is nil, the
+---function discards the downloaded data. The optional parameters are the following:
+---
+--- method: The HTTP request method. Defaults to "GET";
+--- headers: Any additional HTTP headers to send with the request;
+--- source: simple LTN12 source to provide the request body. If there is a body,
+---  you need to provide an appropriate "content-length" request header field, or
+---  the function will attempt to send the body as "chunked" (something few servers
+---  support). Defaults to the empty source;
+--- step: LTN12 pump step function used to move data. Defaults to the LTN12 
+---  pump.step function.
+--- proxy: The URL of a proxy server to use. Defaults to no proxy;
+--- redirect: Set to false to prevent the function from automatically following 
+---  301 or 302 server redirect messages;
+--- create: An optional function to be used instead of socket.tcp when the
+---  communications socket is created.
+--- maxredirects: An optional number specifying the maximum number of redirects 
+---  to follow. Defaults to 5 if not specified. A boolean false value means no 
+---  maximum (unlimited).
+---
+---In case of failure, the function returns nil followed by an error message. If
+---successful, returns `1`, followed by the response status code, the response 
+---headers and the response status line (the body goes to the sink). 
+---
+---@param url string
+---@param sink ltn12.sink.sink
+---@param method socket.http.methods The HTTP request method. Defaults to "GET"
+---@param headers socket.http.headers Any additional HTTP headers to send with the request
+---@param source ltn12.source.source simple LTN12 source to provide the request body
+---@param step ltn12.pump.pump LTN12 pump step function used to move data
+---@param proxy string The URL of a proxy server to use. Defaults to no proxy
+---@param redirect boolean Set to false to prevent the function from automatically following 301 or 302 server redirect messages
+---@param create function An optional function to be used instead of socket.tcp when the communications socket is created
+---@param maxredirects integer An optional number specifying the maximum number of redirects to follow
+function socket.http.request(url, sink, method, headers, source, step, proxy, redirect, create, maxredirects) end
+
+return socket.http

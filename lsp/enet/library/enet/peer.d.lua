@@ -62,6 +62,7 @@ function enet.peer:ping() end
 function enet.peer:ping_interval(interval) end
 
 ---Forcefully disconnects peer. The peer is not notified of the disconnection.
+---
 function enet.peer:reset() end
 
 ---Queues a packet to be send to peer.
