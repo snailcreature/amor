@@ -3,6 +3,23 @@
 ---@class mime
 mime = {}
 
+---@alias mime.dos "\x0D\x0A" `"\x0D\x0A"`
+---@type mime.dos `"\x0D\x0A"`
+mime.dos = "\x0D\x0A"
+
+---@alias mime.cr "\x0D" `"\x0D"`
+---@type mime.cr `"\x0D"`
+mime.cr = "\x0D"
+
+---@alias mime.lf "\x0A" `"\x0A"`
+---@type mime.lf `"\x0A"`
+mime.lf = "\x0A"
+
+---@alias mime.marker # end-of-line marker
+--- | mime.dos # `"\x0D\x0A"`
+--- | mime.cr  # `"\x0D"`
+--- | mime.lf  # `"\x0A"`
+
 ---Returns a filter that decodes data from a given transfer content encoding.
 ---
 ---@param format "base64"|"quoted-printable"
@@ -53,7 +70,7 @@ function mime.encode(format, mode) end
 ---function will still work well, although it doesn't guarantee that the number
 ---of empty lines will be correct.
 ---
----@param marker string?
+---@param marker mime.marker?
 ---@return ltn12.filter.filter
 function mime.normalize(marker) end
 
@@ -128,5 +145,61 @@ function mime.b64(C, D) end
 ---@param B string?
 ---@return [A, n]
 function mime.dot(m, B) end
+
+---Low-level filter to perform end-of-line marker translation. For each chunk,
+---the function needs to know if the last character of the previous chunk could
+---be part of an end-of-line marker or not. This is the context the function
+---receives besides the chunk. An updated version of the context is returned
+---after each new chunk.
+---
+---`A` is the translated version of `D`. `C` is the ASCII value of the last
+---character of the previous chunk, if it was a candidate for line break, or 0
+---otherwise. `B` is the same as `C`, but for the current chunk. `Marker` gives
+---the new end-of-line marker and defaults to CRLF.
+---
+---@generic A: string
+---@generic B: string|0
+---@param C string|0
+---@param D string?
+---@param marker mime.marker?
+---@return [A, B]
+function mime.eol(C, D, marker) end
+
+---Low-level filter to perform Quoted-Printable encoding.
+---
+---`A` is the encoded version of the largest prefix of `C..D` that can be
+---encoded unambiguously. `B` has the remaining bytes of `C..D`, *before*
+---encoding. If `D` is `nil`, `A` is padded with the encoding of the remaining
+---bytes of `C`. Throughout encoding, occurrences of CRLF are replaced by the
+---`marker`, which itself defaults to CRLF.
+---
+---Note: the simplest use of this function is to encode a string into its
+---Quoted-Printable transfer content encoding.
+---
+---@generic A: string
+---@generic B: string
+---@param C string
+---@param D string?
+---@param marker mime.marker?
+---@return [A, B]
+function mime.qp(C, D, marker) end
+
+---Low-level filter to break Quoted-Printable text into lines.
+---
+---`A` is a copy of `B`, broken into lines of at most `length` bytes (defaults
+---to 76). `n` should tell how many bytes are left for the first line of `B` and
+---`m` returns the number of bytes left in the last line of `A`.
+---
+---Note: Besides breaking text into lines, this function makes sure the line
+---breaks don't fall in the middle of an escaped character combination. Also,
+---this function only breaks lines that are bigger than `length` bytes.
+---
+---@generic A: string
+---@generic m: integer
+---@param n integer
+---@param B string?
+---@param length integer?
+---@return [A, m]
+function mime.qpwrp(n, B, length) end
 
 return mime
