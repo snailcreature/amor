@@ -1,0 +1,88 @@
+---@meta
+
+---@class socket.smtp.Headers
+---@field [string] string
+
+---@class socket.smtp.Message
+---@field headers socket.smtp.Headers
+---@field body ltn12.source.source | string | socket.smtp.MultipartMessage
+
+---@class socket.smtp.MultipartMessage
+---@field preamble string
+---@field epilogue string
+---@field [integer] socket.smtp.Message
+
+socket.smtp = {}
+
+---Returns a simple LTN12 source that sends an SMTP message body, possibly
+---multipart (arbitrarily deep).
+---
+---The only parameter of the function is a table describing the message. Mesgt
+---has the following form (notice the recursive structure):
+---
+---```lua
+---mesgt = {
+---  headers = header-table,
+---  body = LTN12 source or string or multipart-mesgt
+---}
+--- 
+---multipart-mesgt = {
+---  [preamble = string,]
+---  [1] = mesgt,
+---  [2] = mesgt,
+---  ...
+---  [n] = mesgt,
+---  [epilogue = string,]
+---}
+---```
+---
+---For a simple message, all that is needed is a set of headers and the body.
+---The message body can be given as a string or as a simple LTN12 source. For
+---multipart messages, the body is a table that recursively defines each part
+---as an independent message, plus an optional preamble and epilogue.
+---
+---The function returns a simple LTN12 source that produces the message
+---contents as defined by mesgt, chunk by chunk.
+---
+---@param mesgt socket.smtp.Message
+---@return ltn12.source.source
+function socket.smtp.message(mesgt) end
+
+---Sends a message to a recipient list. Since sending messages is not as
+---simple as downloading an URL from a FTP or HTTP server, this function
+---doesn't have a simple interface. However, see the message source factory
+---for a very powerful way to define the message contents.
+---
+---The sender is given by the e-mail address in the from field. Rcpt is a Lua
+---table with one entry for each recipient e-mail address, or a string in case
+---there is just one recipient. The contents of the message are given by a
+---simple LTN12 source. Several arguments are optional:
+---
+---* user, password: User and password for authentication. The function will
+--- attempt LOGIN and PLAIN authentication methods if supported by the server
+--- (both are unsafe);
+---* server: Server to connect to. Defaults to "localhost";
+---* port: Port to connect to. Defaults to 25;
+---* domain: Domain name used to greet the server; Defaults to the local
+--- machine host name;
+---* step: LTN12 pump step function used to pass data from the source to the
+--- server. Defaults to the LTN12 pump.step function;
+---* create: An optional function to be used instead of socket.tcp when the
+--- communications socket is created.
+---
+---If successful, the function returns 1. Otherwise, the function returns nil followed by an error message. 
+---
+---[See reference for examples and notes](https://lunarmodules.github.io/luasocket/smtp.html)
+---
+---@param from string
+---@param rcpt string|string[]
+---@param source ltn12.source.source
+---@param user string?
+---@param password string?
+---@param server string?
+---@param port integer?
+---@param domain string?
+---@param step ltn12.pump.pump?
+---@param create function?
+---@return [1, nil]|[nil, string] ...
+function socket.smtp.send(from, rcpt, source, user, password, server, port, domain, step, create) end
