@@ -123,7 +123,7 @@ function mime.wrap(format) end
 ---@generic B: string Remaining bytes of `C..D`, *before* encoding.
 ---@param C string
 ---@param D string?
----@return [A, B]
+---@return [A, B] ...
 function mime.b64(C, D) end
 
 ---Low-level filter to perform SMTP stuffing and enable transmission of messages
@@ -143,7 +143,7 @@ function mime.b64(C, D) end
 ---@generic n: integer
 ---@param m integer
 ---@param B string?
----@return [A, n]
+---@return [A, n] ...
 function mime.dot(m, B) end
 
 ---Low-level filter to perform end-of-line marker translation. For each chunk,
@@ -162,7 +162,7 @@ function mime.dot(m, B) end
 ---@param C string|0
 ---@param D string?
 ---@param marker mime.marker?
----@return [A, B]
+---@return [A, B] ...
 function mime.eol(C, D, marker) end
 
 ---Low-level filter to perform Quoted-Printable encoding.
@@ -181,7 +181,7 @@ function mime.eol(C, D, marker) end
 ---@param C string
 ---@param D string?
 ---@param marker mime.marker?
----@return [A, B]
+---@return [A, B] ...
 function mime.qp(C, D, marker) end
 
 ---Low-level filter to break Quoted-Printable text into lines.
@@ -199,7 +199,59 @@ function mime.qp(C, D, marker) end
 ---@param n integer
 ---@param B string?
 ---@param length integer?
----@return [A, m]
+---@return [A, m] ...
 function mime.qpwrp(n, B, length) end
+
+---Low-level filter to perform Base64 decoding.
+---
+---`A` is the decoded version of the largest prefix of `C..D` that can be
+---decoded unambiguously. `B` has the remaining bytes of `C..D`, *before*
+---decoding. If `D` is `nil`, `A` is the empty string and `B` returns whatever
+---couldn't be decoded.
+---
+---Note: The simplest use of this function is to decode a string from its Base64
+---transfer content encoding.
+---
+---@generic A: string
+---@generic B: string
+---@param C string
+---@param D string?
+---@return [A, B] ...
+function mime.unb64(C, D) end
+
+---Low-level filter to remove the Quoted-Printable transfer encoding from data.
+---
+---`A` is the decoded version of the largest prefix of `C..D` that can be
+---decoded unambiguously. `B` has the remaining bytes of `C..D` *before*
+---decoding. If `D` is `nil`, `A` is augmented with the encoding of the
+---remaining bytes of `C`.
+---
+---Note: The simplest use of this function is to decode a string from it's
+---Quoted-Printable transfer content encoding.
+---
+---@generic A: string
+---@generic B: string
+---@param C string
+---@param D string?
+---@return [A, B] ...
+function mime.unqp(C, D) end
+
+---Low-level filter to break text into lines with CRLF marker. Text is assumed
+---to be in the `normalize` form.
+---
+---`A` is a copy of `B`, broken into lines of at most `length` bytes (defaults
+---to 76). `'n'` should tell how many bytes are left for the first line of `B`
+---and `'m'` returns the number of bytes left in the last line of `A`.
+---
+---Note: This function only breaks lines that are bigger than `length` bytes.
+---The resulting line length does not include the CRLF marker.
+---
+---@generic A: string
+---@generic m: integer
+---@param n integer
+---@param B string?
+---@param length integer?
+---@return [A, m] ...
+function mime.wrp(n, B, length) end
 
 return mime
