@@ -98,6 +98,7 @@ function socket.url.escape(content) end
 ---
 ---The function returns a table with all the URL components:
 ---
+---```
 ---    parsed_url = {
 ---      url = string,
 ---      scheme = string,
@@ -112,6 +113,7 @@ function socket.url.escape(content) end
 ---      user = string,
 ---      password = string
 ---    }
+---```
 ---
 ---@param url string
 ---@param default socket.url.ParsedUrl?

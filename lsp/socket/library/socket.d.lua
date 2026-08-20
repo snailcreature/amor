@@ -396,7 +396,7 @@ function socket.dns.toip(address) end
 ---Note: Before the choice between IPv4 and IPv6 happens, the internal socket
 ---object is invalid and therefore setoption will fail.
 ---
----@return socket.Result<socket.master, string>
+---@return socket.Result<socket.master, string> ...
 function socket.tcp() end
 
 ---Creates and returns an TCP master object. A master object can be transformed
@@ -407,7 +407,7 @@ function socket.tcp() end
 ---In case of success, a new master object is returned. In case of error, nil
 ---is returned, followed by an error message.
 ---
----@return socket.Result<socket.master, string>
+---@return socket.Result<socket.master, string> ...
 function socket.tcp4() end
 
 ---Creates and returns an IPv6 TCP master object. A master object can be transformed
@@ -420,7 +420,7 @@ function socket.tcp4() end
 ---
 ---Note: The TCP object returned will have the option "ipv6-v6only" set to true.
 ---
----@return socket.Result<socket.master, string>
+---@return socket.Result<socket.master, string> ...
 function socket.tcp6() end
 
 ---@class MCS_Common
@@ -606,7 +606,7 @@ function master:connect(address, port) end
 ---returns `nil` followed by an error message.
 ---
 ---@param backlog integer
----@return socket.Result<1, string>
+---@return socket.Result<1, string> ...
 function master:listen(backlog) end
 
 ---@class SC_Common: MCS_Common
@@ -754,7 +754,7 @@ function client:getpeername() end
 ---
 ---@param pattern? '*a'|'*l'|number
 ---@param prefix string?
----@return socket.Result<string, [string|'closed'|'timeout', string]>
+---@return socket.Result<string, [string|'closed'|'timeout', string]> ...
 function client:receive(pattern, prefix) end
 
 ---Sends data through client object.
@@ -825,7 +825,7 @@ function udp_common:close() end
 ---an error message otherwise.
 ---
 ---@param option unknown
----@return socket.Result<unknown, string>
+---@return socket.Result<unknown, string> ...
 ---@overload fun(self, option: 'dontroute'|'broadcast'|'reuseaddr'|'reuseport'|'ip-multicast-loop'|'ipv6-v6only'): socket.Result<boolean, string>
 ---@overload fun(self, option: 'ip-multicast-if'): socket.Result<string, string>
 ---@overload fun(self, option: 'ip-multicast-ttl'): socket.Result<integer, string>
@@ -865,7 +865,7 @@ function udp_common:gettimeout() end
 ---timeout, the method returns nil followed by the string `'timeout'`.
 ---
 ---@param size integer?
----@return socket.Result<string, "timeout">
+---@return socket.Result<string, "timeout"> ...
 function udp_common:receive(size) end
 
 ---Sets options for the UDP object. Options are only needed by low-level or
@@ -904,7 +904,7 @@ function udp_common:receive(size) end
 ---Note: The descriptions above come from the man pages.
 ---
 ---@param option unknown
----@return socket.Result<unknown, string>
+---@return socket.Result<unknown, string> ...
 ---@overload fun(self, option: 'dontroute'|'broadcast'|'reuseaddr'|'reuseport'|'ip-multicast-loop'|'ipv6-v6only', value: boolean?): socket.Result<1, string>
 ---@overload fun(self, option: 'ip-multicast-if', value: string?): socket.Result<1, string>
 ---@overload fun(self, option: 'ip-multicast-ttl', value: integer?): socket.Result<1, string>
@@ -963,7 +963,7 @@ function connected:getpeername() end
 ---address (i.e. no interface accepts the address).
 ---
 ---@param datagram string
----@return socket.Result<1, string>
+---@return socket.Result<1, string> ...
 function connected:send(datagram) end
 
 ---Changes the peer of a UDP object. This method turns an unconnected UDP
@@ -993,7 +993,7 @@ function connected:send(datagram) end
 ---or until the last failure.
 ---
 ---@param address "*"
----@return socket.Result<1, string>
+---@return socket.Result<1, string> ...
 function connected:setpeername(address) end
 
 ---@class socket.unconnected: udp_common
@@ -1052,7 +1052,7 @@ function unconnected:sendto(datagram, ip, port) end
 ---
 ---@param address string
 ---@param port integer
----@return socket.Result<1, string>
+---@return socket.Result<1, string> ...
 function unconnected:setpeername(address, port) end
 
 --- Binds the UDP object to a local address.
@@ -1073,7 +1073,7 @@ function unconnected:setpeername(address, port) end
 ---
 ---@param address string
 ---@param port integer
----@return socket.Result<1, string>
+---@return socket.Result<1, string> ...
 function unconnected:setsockname(address, port) end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
@@ -1091,7 +1091,7 @@ function unconnected:setsockname(address, port) end
 ---Note: Before the choice between IPv4 and IPv6 happens, the internal socket
 ---object is invalid and therefore setoption will fail.
 ---
----@return socket.Result<socket.unconnected, string>
+---@return socket.Result<socket.unconnected, string> ...
 function socket.udp() end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
@@ -1102,7 +1102,7 @@ function socket.udp() end
 ---In case of success, a new unconnected UDP object returned. In case of error,
 ---nil is returned, followed by an error message.
 ---
----@return socket.Result<socket.unconnected, string>
+---@return socket.Result<socket.unconnected, string> ...
 function socket.udp4() end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
@@ -1115,7 +1115,7 @@ function socket.udp4() end
 ---
 ---Note: The TCP object returned will have the option "ipv6-v6only" set to true.
 ---
----@return socket.Result<socket.unconnected, string>
+---@return socket.Result<socket.unconnected, string> ...
 function socket.udp6() end
 
 ---@alias socket.socket socket.master|socket.server|socket.client|socket.connected|socket.unconnected

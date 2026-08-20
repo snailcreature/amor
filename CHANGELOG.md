@@ -23,6 +23,7 @@ format.
  - `install.sh` script for automatically installing amor in `~/.local/share/amor`
  - Lua Language Server definitions for lua-enet (bundled with Löve)
  - Lua Language Server definitions for utf8 (Lua 5.3; bundled with Löve)
+ - Lua Language Server definitions for LuaSocket (bundled with Löve)
 
 ### Changed
 
