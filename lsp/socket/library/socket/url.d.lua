@@ -1,5 +1,25 @@
 ---@meta
 
+---The url namespace provides functions to parse, protect, and build URLs, as well as functions to compose absolute URLs from base and relative URLs, according to RFC 2396.
+---
+---To obtain the url namespace, run:
+---
+---```lua
+----- loads the URL module
+---local url = require("socket.url")
+---```
+---
+---An URL is defined by the following grammar:
+---
+---```
+---    <url> ::= [<scheme>:][//<authority>][/<path>][;<params>][?<query>][#<fragment>]
+---    <authority> ::= [<userinfo>@]<host>[:<port>]
+---    <userinfo> ::= <user>[:<password>]
+---    <path> ::= {<segment>/}<segment>
+---```
+---
+---[See full documentation for examples](https://lunarmodules.github.io/luasocket/url.html)
+---
 ---@class socket.url
 socket.url = {}
 
@@ -104,7 +124,7 @@ function socket.url.parse(url, default) end
 ---
 ---Since some characters are reserved in URLs, they must be escaped whenever
 ---present in a <path> component. Therefore, before returning a list with all
----the parsed segments, the function removes escaping from all of them. 
+---the parsed segments, the function removes escaping from all of them.
 ---
 ---@param path string
 ---@return string[]
@@ -114,7 +134,7 @@ function socket.url.parse_path(path) end
 ---
 ---Content is the string to be decoded.
 ---
----The function returns the decoded string. 
+---The function returns the decoded string.
 ---
 ---@param content string
 ---@return string

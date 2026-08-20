@@ -12,6 +12,58 @@
 ---@field epilogue string
 ---@field [integer] socket.smtp.Message
 
+---The smtp namespace provides functionality to send e-mail messages. The
+---high-level API consists of two functions: one to define an e-mail message,
+---and another to actually send the message. Although almost all users will
+---find that these functions provide more than enough functionality, the
+---underlying implementation allows for even more control (if you bother to
+---read the code).
+---
+---The implementation conforms to the Simple Mail Transfer Protocol, RFC 2821.
+---Another RFC of interest is RFC 2822, which governs the Internet Message
+---Format. Multipart messages (those that contain attachments) are part of the
+---MIME standard, but described mainly in RFC 2046.
+---
+---In the description below, good understanding of LTN012, Filters sources and
+---sinks and the MIME module is assumed. In fact, the SMTP module was the main
+---reason for their creation.
+---
+---To obtain the smtp namespace, run:
+---
+---```lua
+----- loads the SMTP module and everything it requires
+---local smtp = require("socket.smtp")
+---```
+---
+---MIME headers are represented as a Lua table in the form:
+---
+---```
+---    headers = {
+---      field-1-name = field-1-value,
+---      field-2-name = field-2-value,
+---      field-3-name = field-3-value,
+---      ...
+---      field-n-name = field-n-value
+---    }
+---```
+---
+---Field names are case insensitive (as specified by the standard) and all
+---functions work with lowercase field names (but see [socket.headers.canonic](lua://socket.headers.canonic)).
+---Field values are left unmodified.
+---
+---Note: MIME headers are independent of order. Therefore, there is no problem
+---in representing them in a Lua table.
+---
+---The following constants can be set to control the default behavior of the
+---SMTP module:
+---
+---* DOMAIN: domain used to greet the server;
+---* PORT: default port used for the connection;
+---* SERVER: default server used for the connection;
+---* TIMEOUT: default timeout for all I/O operations;
+---* ZONE: default time zone.
+---
+---@class socket.smtp
 socket.smtp = {}
 
 ---Returns a simple LTN12 source that sends an SMTP message body, possibly
@@ -43,6 +95,8 @@ socket.smtp = {}
 ---
 ---The function returns a simple LTN12 source that produces the message
 ---contents as defined by mesgt, chunk by chunk.
+---
+---[See full documentation](https://lunarmodules.github.io/luasocket/smtp.html)
 ---
 ---@param mesgt socket.smtp.Message
 ---@return ltn12.source.source

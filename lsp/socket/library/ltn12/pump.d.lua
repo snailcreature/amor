@@ -3,8 +3,7 @@
 ---@class ltn12.pump
 ltn12.pump = {}
 
----Pushes data through a LTN12 network from
----source to sink
+---Pushes data through a LTN12 network from source to sink
 ---
 ---@class ltn12.pump.pump: function 
 ltn12.pump.pump = {}

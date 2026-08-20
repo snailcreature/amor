@@ -14,6 +14,18 @@ socket = {}
 
 socket.headers = {}
 
+---The socket.headers.canonic table is used by the HTTP and SMTP modules to
+---translate from lowercase field names back into their canonic capitalization.
+---When a lowercase field name exists as a key in this table, the associated
+---value is substituted in whenever the field name is sent out.
+---
+---You can obtain the headers namespace if case run-time modifications are
+---required by running:
+---```lua
+----- loads the headers module
+---local headers = require("headers")
+---```
+---
 ---@type headers
 socket.headers.canonic = headers
 
@@ -31,12 +43,13 @@ socket.headers.canonic = headers
 --- | socket.Ok<O>
 --- | socket.Err<E>
 
---- This function is a shortcut that creates and returns a TCP server object bound
---- to a local address and port, ready to accept client connections. Optionally,
---- user can also specify the backlog argument to the listen method (defaults to
---- 32).
+---This function is a shortcut that creates and returns a TCP server object bound
+---to a local address and port, ready to accept client connections. Optionally,
+---user can also specify the backlog argument to the listen method (defaults to
+---32).
 ---
---- Note: The server object returned will have the option "reuseaddr" set to true.
+---Note: The server object returned will have the option "reuseaddr" set to true.
+---
 ---@param address string Local address of the server
 ---@param port integer Local port of the server
 ---@param backlog integer? Number of client connections that can be queues waiting for service
@@ -49,7 +62,7 @@ function socket.bind(address, port, backlog) end
 ---family to "inet" or "inet6". Without specifying family to connect, whether a
 ---tcp or tcp6 connection is created depends on your system configuration. Two
 ---variations of connect are defined as simple helper functions that restrict the
----family, socket.connect4 and socket.connect6.
+---family, [socket.connect4](lua://socket.connect4) and [socket.connect6](lua://socket.connect6).
 ---
 ---@param address string
 ---@param port integer
@@ -65,7 +78,7 @@ function socket.connect(address, port, locaddr, locport, family) end
 ---family to "inet" or "inet6". Without specifying family to connect, whether a
 ---tcp or tcp6 connection is created depends on your system configuration. Two
 ---variations of connect are defined as simple helper functions that restrict the
----family, socket.connect4 and socket.connect6.
+---family, [socket.connect4](lua://socket.connect4) and [socket.connect6](lua://socket.connect6).
 ---
 ---@param address string
 ---@param port integer
@@ -81,7 +94,7 @@ function socket.connect4(address, port, locaddr, locport, family) end
 ---family to "inet" or "inet6". Without specifying family to connect, whether a
 ---tcp or tcp6 connection is created depends on your system configuration. Two
 ---variations of connect are defined as simple helper functions that restrict the
----family, socket.connect4 and socket.connect6.
+---family, [socket.connect4](lua://socket.connect4) and [socket.connect6](lua://socket.connect6).
 ---
 ---@param address string
 ---@param port integer
@@ -127,20 +140,21 @@ function socket.gettime() end
 ---    c:close()
 ---end)
 ---```
+---
 ---@generic T: function
 ---@param finalizer T
 ---@return T
 function socket.newtry(finalizer) end
 
 ---Converts a function that throws exceptions into a safe function. This function
----only catches exceptions thrown by the try and newtry functions. It does not
+---only catches exceptions thrown by the [try](lua://socket.try) and [newtry](lua://socket.newtry) functions. It does not
 ---catch normal Lua errors. This implements the ideas described in [LTN012, Using
 ---finalized exceptions](https://github.com/lunarmodules/luasocket/blob/master/ltn013.md).
 ---
----Func is a function that calls try (or assert, or error) to throw exceptions.
+---Func is a function that calls [try](lua://socket.try) (or assert, or error) to throw exceptions.
 ---
 ---Returns an equivalent function that instead of throwing exceptions in case of
----a failed try call, returns nil followed by an error message.
+---a failed [try](lua://socket.try) call, returns nil followed by an error message.
 ---
 ---@generic T: function
 ---@param func T
@@ -164,7 +178,7 @@ function socket.protect(func) end
 ---changed status.
 ---
 ---**Note:** select can monitor a limited number of sockets, as defined by the
----constant socket._SETSIZE. This number may be as high as 1024 or as low as 64
+---constant [socket._SETSIZE](lua://socket._SETSIZE). This number may be as high as 1024 or as low as 64
 ---by default, depending on the system. It is usually possible to change this at
 ---compile time. Invoking select with a larger number of sockets will raise an error.
 ---
@@ -173,8 +187,8 @@ function socket.protect(func) end
 ---is not ready for sending.
 ---
 ---**Another important note:** calling select with a server socket in the receive
----parameter before a call to accept does not guarantee accept will return immediately.
----Use the settimeout method or accept might block forever.
+---parameter before a call to [accept](lua://socket.server.accept) does not guarantee accept will return immediately.
+---Use the [settimeout](lua://socket.master.settimeout) method or accept might block forever.
 ---
 ---**Yet another note:** If you close a socket and pass it to select, it will be
 ---ignored.
@@ -220,7 +234,7 @@ function socket.sink(mode, socket) end
 ---```lua
 ----- get the status code and separator from SMTP server reply
 ---local code, sep = socket.skip(2, string.find(line, "^(%d%d%d)(.?)"))
----
+---```
 ---
 ---@generic T: unknown
 ---@param d integer
@@ -257,14 +271,14 @@ function socket.sleep(time) end
 function socket.source(mode, socket, length) end
 
 ---Throws an exception in case ret1 is falsy, using ret2 as the error message.
----The exception is supposed to be caught by a protected function only. This
+---The exception is supposed to be caught by a [protect](lua://socket.protect)ed function only. This
 ---implements the ideas described in LTN012, Using finalized exceptions.
 ---
 ---Ret1 to retN can be arbitrary arguments, but are usually the return values
 ---of a function call nested with try.
 ---
 ---The function returns ret1 to retN if ret1 is not nil or false. Otherwise, it
----calls error passing ret2 wrapped in a table with metatable used by protect to
+---calls error passing ret2 wrapped in a table with metatable used by [protect](lua://socket.protect) to
 ---distinguish exceptions from runtime errors.
 ---
 ---```lua
@@ -277,9 +291,100 @@ function socket.source(mode, socket, length) end
 ---@return table|unknown ...
 function socket.try(ret1, ...) end
 
+---IPv4 name resolution functions [dns.toip](lua://socket.dns.toip) and [dns.tohostname](lua://socket.dns.tohostname) return all
+---information obtained from the resolver in a table of the form:
+---
+---```
+---    resolved4 = {
+---      name = canonic-name,
+---      alias = alias-list,
+---      ip = ip-address-list
+---    }
+---```
+---
+---Note that the alias list can be empty.
+---
+---The more general name resolution function [dns.getaddrinfo](lua://socket.dns.getaddrinfo), which supports
+---both IPv6 and IPv4, returns all information obtained from the resolver in a
+---table of the form:
+---
+---```
+---    resolved6 = {
+---      [1] = {
+---        family = family-name-1,
+---        addr = address-1
+---      },
+---      ...
+---      [n] = {
+---        family = family-name-n,
+---        addr = address-n
+---      }
+---    }
+---```
+---
+---Here, family contains the string "inet" for IPv4 addresses, and "inet6" for
+---IPv6 addresses.
+---
+---@class socket.dns
+socket.dns = {}
+
+---@class socket.dns.resolved4
+---@field name string Canonic name
+---@field alias string[] List of aliases; can be empty
+---@field ip string[] List of IP addresses
+socket.dns.resolved4 = {}
+
+---@class socket.dns._resolved6_entry
+---@field family "inet"|"inet6"
+---@field addr string
+socket.dns._resolved6_entry = {}
+
+---@class socket.dns.resolved6
+---@field [number] socket.dns._resolved6_entry
+
+---Converts from host name to address.
+---
+---Address can be an IPv4 or IPv6 address or host name.
+---
+---The function returns a table with all information returned by the resolver. In
+---case of error, the function returns nil followed by an error message.
+---
+---@param address string IPv4 or IPv6 address or host name
+---@return [socket.dns.resolved6, nil]|[nil, string]
+function socket.dns.getaddrinfo(address) end
+
+---Returns the standard host name for the machine as a string.
+---
+---@return string
+function socket.dns.gethostname() end
+
+---Converts from IPv4 address to host name.
+---
+---Address can be an IP address or host name.
+---
+---The function returns a string with the canonic host name of the given address,
+---followed by a table with all information returned by the resolver. In case of
+---error, the function returns nil followed by an error message.
+---
+---@param address string IP address or host name
+---@return [string, socket.dns.resolved4]|[nil, string]
+function socket.dns.tohostname(address) end
+
+---Converts from host name to IPv4 address.
+---
+---Address can be an IP address or host name.
+---
+---Returns a string with the first IP address found for address, followed by a table
+---with all information returned by the resolver. In case of error, the function
+---returns nil followed by an error message.
+---
+---@param address string IP address or host name
+---@return [string, socket.dns.resolved4]|[nil, string]
+function socket.dns.toip(address) end
+
 ---Creates and returns an TCP master object. A master object can be transformed
----into a server object with the method listen (after a call to bind) or into a
----client object with the method connect. The only other method supported by a
+---into a server object with the method [listen](lua://master.listen) (after a call to [bind](lua://master.bind)) or into a
+---client object with the method [connect](lua://master.connect). The only other method supported by a
 ---master object is the close method.
 ---
 ---In case of success, a new master object is returned. In case of error, nil
@@ -294,10 +399,10 @@ function socket.try(ret1, ...) end
 ---@return socket.Result<socket.master, string>
 function socket.tcp() end
 
----Creates and returns an IPv4 TCP master object. A master object can be
----transformed into a server object with the method listen (after a call to
----bind) or into a client object with the method connect. The only other
----method supported by a master object is the close method.
+---Creates and returns an TCP master object. A master object can be transformed
+---into a server object with the method [listen](lua://master.listen) (after a call to [bind](lua://master.bind)) or into a
+---client object with the method [connect](lua://master.connect). The only other method supported by a
+---master object is the close method.
 ---
 ---In case of success, a new master object is returned. In case of error, nil
 ---is returned, followed by an error message.
@@ -305,10 +410,10 @@ function socket.tcp() end
 ---@return socket.Result<socket.master, string>
 function socket.tcp4() end
 
----Creates and returns an IPv6 TCP master object. A master object can be
----transformed into a server object with the method listen (after a call to
----bind) or into a client object with the method connect. The only other method
----supported by a master object is the close method.
+---Creates and returns an IPv6 TCP master object. A master object can be transformed
+---into a server object with the method [listen](lua://master.listen) (after a call to [bind](lua://master.bind)) or into a
+---client object with the method [connect](lua://master.connect). The only other method supported by a
+---master object is the close method.
 ---
 ---In case of success, a new master object is returned. In case of error, nil
 ---is returned, followed by an error message.
@@ -345,7 +450,7 @@ function mcs_common:dirty() end
 ---Returns the underling socket descriptor or handle associated to the object.
 ---
 ---The descriptor or handle. In case the object has been closed, the return
----value will be `-1`. For an invalid socket it will be [_SOCKETINVALID].
+---value will be `-1`. For an invalid socket it will be [_SOCKETINVALID](lua://socket._SOCKETINVALID).
 ---
 ---Note: *This is an internal method. Unlikely to be portable. Use at your own
 ---risk.*
@@ -426,7 +531,7 @@ function mcs_common:settimeout(value, mode) end
 
 ---Sets the underling socket descriptor or handle associated to the object.
 ---The current one is simply replaced, not closed, and no other change to the
----object state is made. To set it as invalid use _SOCKETINVALID.
+---object state is made. To set it as invalid use [_SOCKETINVALID](lua://socket._SOCKETINVALID).
 ---
 ---No return value.
 ---
@@ -490,7 +595,7 @@ function master:bind(address, port) end
 function master:connect(address, port) end
 
 ---Specofoes the socket is willing to receive connections, transforming the
----object into a server object. Server objects support the [accept],
+---object into a server object. Server objects support the [accept](lua://server.accept),
 ---[getsockname], [setoption], [settimeout], and [close] methods.
 ---
 ---The parameter `backlog` specifies the number of client connections that can
@@ -514,6 +619,7 @@ local sc_common = mcs_common
 ---
 ---The method returns the option value in case of success, or `nil` followed by
 ---an error message otherwise
+---
 ---@param option unknown
 ---@return socket.Result<unknown, string> ...
 ---@overload fun(self, option: 'keepalive'): socket.Result<boolean, string>
@@ -732,8 +838,8 @@ function udp_common:getoption(option) end
 ---Returns a string with the IP address of the peer, a number with the local port,
 ---and a string with the family. In case of error, the method returns nil.
 ---
----Note: UDP sockets are not bound to any address until the [setsockname] or the
----[sendto] method is called for the first time (in which case it is bound to an
+---Note: UDP sockets are not bound to any address until the [setsockname](lua://unconnected.setsockname) or the
+---[sendto](lua://unconnected.sendto) method is called for the first time (in which case it is bound to an
 ---ephemeral port and the wild-card address).
 ---
 ---@return [string, integer, "inet"|"inet6"]|nil ...
@@ -752,7 +858,7 @@ function udp_common:gettimeout() end
 ---retrieved. If there are more than `size` bytes available in the datagram, the
 ---excess bytes are discarded. If there are less than `size` bytes available in
 ---the current datagram, the available bytes are returned. If `size` is omitted,
----the compile-time constant [socket._DATAGRAMSIZE] is used (it defaults to 8192
+---the compile-time constant [socket._DATAGRAMSIZE](lua://socket._DATAGRAMSIZE) is used (it defaults to 8192
 ---bytes). Larger sizes will cause a temporary buffer to be allocated for the operation.
 ---
 ---In case of success the method returns the received datagram, In case of
@@ -806,8 +912,8 @@ function udp_common:receive(size) end
 ---@overload fun(self, option: 'ip-drop-membership', value: socket.UDP_Membership?): socket.Result<1, string>
 function udp_common:setoption(option, value) end
 
----Changes the timeout values for the object. By default, the receive and
----receivefrom operations are blocking. That is, any call to the methods will
+---Changes the timeout values for the object. By default, the [receive] and
+---[receivefrom](lua://unconnected.receivefrom) operations are blocking. That is, any call to the methods will
 ---block indefinitely, until data arrives. The settimeout function defines a
 ---limit on the amount of time the functions can block. When a timeout is set
 ---and the specified amount of time has elapsed, the affected methods give up
@@ -817,13 +923,13 @@ function udp_common:setoption(option, value) end
 ---The nil timeout value allows operations to block indefinitely. Negative
 ---timeout values have the same effect.
 ---
----Note: In UDP, the send and sendto methods never block (the datagram is just
+---Note: In UDP, the [send] and [sendto](lua://unconnected.sendto) methods never block (the datagram is just
 ---passed to the OS and the call returns immediately). Therefore, the
 ---settimeout method has no effect on them.
 ---
 ---Note: The old timeout method is deprecated. The name has been changed for
 ---sake of uniformity, since all other method names already contained verbs
----making their imperative nature obvious. 
+---making their imperative nature obvious.
 ---
 ---@param value number|nil
 function udp_common:settimeout(value) end
@@ -865,8 +971,8 @@ function connected:send(datagram) end
 ---
 ---For connected objects, outgoing datagrams will be sent to the specified
 ---peer, and datagrams received from other peers will be discarded by the OS.
----Connected UDP objects must use the send and receive methods instead of
----sendto and receivefrom.
+---Connected UDP objects must use the [send](lua://connected.send) and [receive] methods instead of
+---[sendto](lua://unconnected.sendto) and [receivefrom](lua://unconnected.receivefrom).
 ---
 ---Address can be an IP address or a host name. Port is the port number. If
 ---address is '*' and the object is connected, the peer association is removed
@@ -882,9 +988,9 @@ function connected:send(datagram) end
 ---gains.
 ---
 ---Note: Starting with LuaSocket 3.0, the host name resolution depends on
----whether the socket was created by socket.udp or socket.udp6. Addresses
+---whether the socket was created by [socket.udp](lua://socket.udp) or [socket.udp6](lua://socket.udp6). Addresses
 ---from the appropriate family are tried in succession until the first success
----or until the last failure. 
+---or until the last failure.
 ---
 ---@param address "*"
 ---@return socket.Result<1, string>
@@ -893,8 +999,9 @@ function connected:setpeername(address) end
 ---@class socket.unconnected: udp_common
 unconnected = udp_common
 
----Works exactly as the [receive] methid, except it returns the IP address and
+---Works exactly as the [receive](lua://client.receive) method, except it returns the IP address and
 ---port as extra return values (and is therefore slightly less efficient).
+---
 ---@param size integer?
 ---@return [string, string, integer]|[nil, "timeout"] ...
 function unconnected:receivefrom(size) end
@@ -922,8 +1029,8 @@ function unconnected:sendto(datagram, ip, port) end
 ---
 ---For connected objects, outgoing datagrams will be sent to the specified
 ---peer, and datagrams received from other peers will be discarded by the OS.
----Connected UDP objects must use the send and receive methods instead of
----sendto and receivefrom.
+---Connected UDP objects must use the [send](lua://connected.send) and [receive] methods instead of
+---[sendto](lua://unconnected.sendto) and [receivefrom](lua://unconnected.receivefrom).
 ---
 ---Address can be an IP address or a host name. Port is the port number. If
 ---address is '*' and the object is connected, the peer association is removed
@@ -939,9 +1046,9 @@ function unconnected:sendto(datagram, ip, port) end
 ---gains.
 ---
 ---Note: Starting with LuaSocket 3.0, the host name resolution depends on
----whether the socket was created by socket.udp or socket.udp6. Addresses
+---whether the socket was created by [socket.udp](lua://socket.udp) or [socket.udp6](lua://socket.udp6). Addresses
 ---from the appropriate family are tried in succession until the first success
----or until the last failure. 
+---or until the last failure.
 ---
 ---@param address string
 ---@param port integer
@@ -962,7 +1069,7 @@ function unconnected:setpeername(address, port) end
 ---the object to all local interfaces and chooses an ephemeral port as soon
 ---as the first datagram is sent. After the local address is set, either
 ---automatically by the system or explicitly by setsockname, it cannot be
----changed. 
+---changed.
 ---
 ---@param address string
 ---@param port integer
@@ -970,26 +1077,26 @@ function unconnected:setpeername(address, port) end
 function unconnected:setsockname(address, port) end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
----the sendto, receive, receivefrom, getoption, getsockname, setoption,
----settimeout, setpeername, setsockname, and close. The setpeername is used to
+---the [sendto](lua://unconnected.sendto), [receive], [receivefrom](lua://unconnected.receivefrom), [getoption], [getsockname], [setoption],
+---[settimeout], [setpeername](lua://unconnected.setpeername), [setsockname](lua://unconnected.setsockname), and close. The [setpeername](lua://unconnected.setpeername) is used to
 ---connect the object.
 ---
 ---In case of success, a new unconnected UDP object returned. In case of error,
 ---nil is returned, followed by an error message.
 ---
----Note: The choice between IPv4 and IPv6 happens during a call to sendto,
----setpeername, or sockname, depending on the address family obtained from
+---Note: The choice between IPv4 and IPv6 happens during a call to [sendto](lua://unconnected.sendto),
+---[setpeername](lua://unconnected.setpeername), or [sockname](lua://unconnected.setsockname), depending on the address family obtained from
 ---the resolver.
 ---
 ---Note: Before the choice between IPv4 and IPv6 happens, the internal socket
----object is invalid and therefore setoption will fail. 
+---object is invalid and therefore setoption will fail.
 ---
 ---@return socket.Result<socket.unconnected, string>
 function socket.udp() end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
----the sendto, receive, receivefrom, getoption, getsockname, setoption,
----settimeout, setpeername, setsockname, and close. The setpeername is used to
+---the [sendto](lua://unconnected.sendto), [receive], [receivefrom](lua://unconnected.receivefrom), [getoption], [getsockname], [setoption],
+---[settimeout], [setpeername](lua://unconnected.setpeername), [setsockname](lua://unconnected.setsockname), and close. The [setpeername](lua://unconnected.setpeername) is used to
 ---connect the object.
 ---
 ---In case of success, a new unconnected UDP object returned. In case of error,
@@ -999,14 +1106,14 @@ function socket.udp() end
 function socket.udp4() end
 
 ---Creates and returns an unconnected UDP object. Unconnected objects support
----the sendto, receive, receivefrom, getoption, getsockname, setoption,
----settimeout, setpeername, setsockname, and close. The setpeername is used to
+---the [sendto](lua://unconnected.sendto), [receive], [receivefrom](lua://unconnected.receivefrom), [getoption], [getsockname], [setoption],
+---[settimeout], [setpeername](lua://unconnected.setpeername), [setsockname](lua://unconnected.setsockname), and close. The [setpeername](lua://unconnected.setpeername) is used to
 ---connect the object.
 ---
 ---In case of success, a new unconnected UDP object returned. In case of error,
 ---nil is returned, followed by an error message.
 ---
----Note: The TCP object returned will have the option "ipv6-v6only" set to true. 
+---Note: The TCP object returned will have the option "ipv6-v6only" set to true.
 ---
 ---@return socket.Result<socket.unconnected, string>
 function socket.udp6() end

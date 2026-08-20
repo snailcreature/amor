@@ -1,19 +1,28 @@
 ---@meta
 
+---The mime namespace offers filters that apply and remove common content
+---transfer encodings, such as Base64 and Quoted-Printable. It also provides
+---functions to break text into lines and change the end-of-line convention.
+---MIME is described mainly in RFC 2045, 2046, 2047, 2048, and 2049.
+---
+---All functionality provided by the MIME module follows the ideas presented
+---in LTN012, Filters sources and sinks.
+---
+---To obtain the mime namespace, run:
+---
+---```lua
+----- loads the MIME module and everything it requires
+---local mime = require("mime")
+---```
+---
 ---@class mime
 mime = {}
 
 ---@alias mime.dos "\x0D\x0A" `"\x0D\x0A"`
----@type mime.dos `"\x0D\x0A"`
-mime.dos = "\x0D\x0A"
 
 ---@alias mime.cr "\x0D" `"\x0D"`
----@type mime.cr `"\x0D"`
-mime.cr = "\x0D"
 
 ---@alias mime.lf "\x0A" `"\x0A"`
----@type mime.lf `"\x0A"`
-mime.lf = "\x0A"
 
 ---@alias mime.marker # end-of-line marker
 --- | mime.dos # `"\x0D\x0A"`
@@ -76,7 +85,7 @@ function mime.normalize(marker) end
 
 ---Creates and returns a filter that performs stuffing of SMTP messages.
 ---
----Note: the `smtp.send` function uses this filter automatically. You don't need
+---Note: the [`smtp.send`](lua://socket.smtp.send) function uses this filter automatically. You don't need
 ---to chain it with your source, or apply it to your message body.
 ---
 ---@return ltn12.filter.filter
@@ -136,7 +145,7 @@ function mime.b64(C, D) end
 ---Note: The message body is defined to being with an implicit CRLF. Therefore,
 ---to stuff a message correctly, the first `m` should have the value `2`.
 ---
----Note: The `smtp.send` function uses this filter automatically. You don't need
+---Note: The [`smtp.send`](lua://socket.smtp.send) function uses this filter automatically. You don't need
 ---to apply it again.
 ---
 ---@generic A: string
@@ -237,7 +246,7 @@ function mime.unb64(C, D) end
 function mime.unqp(C, D) end
 
 ---Low-level filter to break text into lines with CRLF marker. Text is assumed
----to be in the `normalize` form.
+---to be in the [`normalize`](lua://mime.normalize) form.
 ---
 ---`A` is a copy of `B`, broken into lines of at most `length` bytes (defaults
 ---to 76). `'n'` should tell how many bytes are left for the first line of `B`

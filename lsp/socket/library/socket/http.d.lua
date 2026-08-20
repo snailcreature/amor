@@ -11,14 +11,85 @@
 --- | "TRACE" # Perform a message loop-back test
 --- | "PATCH" # Partially modify the target resource
 
+---HTTP (Hyper Text Transfer Protocol) is the protocol used to exchange
+---information between web-browsers and servers. The http namespace offers
+---full support for the client side of the HTTP protocol (i.e., the facilities
+---that would be used by a web-browser implementation). The implementation
+---conforms to the HTTP/1.1 standard, RFC 2616.
+---
+---The module exports functions that provide HTTP functionality in different
+---levels of abstraction. From the simple string oriented requests, through
+---generic LTN12 based, down to even lower-level if you bother to look through
+---the source code.
+---
+---To obtain the http namespace, run:
+---
+----- loads the HTTP module and any libraries it requires
+---local http = require("socket.http")
+---
+---URLs must conform to RFC 1738, that is, an URL is a string in the form:
+---
+---```
+---    [http://][<user>[:<password>]@]<host>[:<port>][/<path>]
+---```
+---
+---MIME headers are represented as a Lua table in the form:
+---
+---```
+---    headers = {
+---      field-1-name = field-1-value,
+---      field-2-name = field-2-value,
+---      field-3-name = field-3-value,
+---      ...
+---      field-n-name = field-n-value
+---    }
+---```
+---
+---Field names are case insensitive (as specified by the standard) and all
+---functions work with lowercase field names (but see [socket.headers.canonic](lua://socket.headers.canonic)).
+---Field values are left unmodified.
+---
+---Note: MIME headers are independent of order. Therefore, there is no problem
+---in representing them in a Lua table.
+---
+---The following constants can be set to control the default behavior of the
+---HTTP module:
+---
+---* PROXY: default proxy used for connections;
+---* TIMEOUT: sets the timeout for all I/O operations;
+---* USERAGENT: default user agent reported to server.
+---
+---Note: These constants are global. Changing them will also change the
+---behavior other code that might be using LuaSocket. 
+---
 ---@class socket.http
 socket.http = {}
 
+---MIME headers are represented as a Lua table in the form:
+---
+---```
+---    headers = {
+---      field-1-name = field-1-value,
+---      field-2-name = field-2-value,
+---      field-3-name = field-3-value,
+---      ...
+---      field-n-name = field-n-value
+---    }
+---```
+---
+---Field names are case insensitive (as specified by the standard) and all
+---functions work with lowercase field names (but see [socket.headers.canonic](lua://socket.headers.canonic)).
+---Field values are left unmodified.
+---
+---Note: MIME headers are independent of order. Therefore, there is no problem
+---in representing them in a Lua table.
+---
 ---@class socket.http.headers
 ---@field [string] string
 socket.http.headers = {}
 
 ---Download URL using the `GET` or `POST` method as a string
+---
 ---@param url string
 ---@param body string
 ---@return [string, integer, socket.http.headers, string]|[nil, string]
@@ -48,7 +119,7 @@ function socket.http.request(url, body) end
 --- proxy: The URL of a proxy server to use. Defaults to no proxy;
 --- redirect: Set to false to prevent the function from automatically following 
 ---  301 or 302 server redirect messages;
---- create: An optional function to be used instead of socket.tcp when the
+--- create: An optional function to be used instead of [socket.tcp](lua://socket.tcp) when the
 ---  communications socket is created.
 --- maxredirects: An optional number specifying the maximum number of redirects 
 ---  to follow. Defaults to 5 if not specified. A boolean false value means no 
@@ -57,6 +128,8 @@ function socket.http.request(url, body) end
 ---In case of failure, the function returns nil followed by an error message. If
 ---successful, returns `1`, followed by the response status code, the response 
 ---headers and the response status line (the body goes to the sink). 
+---
+---[View full documentation](https://lunarmodules.github.io/luasocket/http.html)
 ---
 ---@param url string
 ---@param sink ltn12.sink.sink
