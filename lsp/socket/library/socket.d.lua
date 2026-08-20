@@ -40,7 +40,7 @@ socket.headers.canonic = headers
 ---@param address string Local address of the server
 ---@param port integer Local port of the server
 ---@param backlog integer? Number of client connections that can be queues waiting for service
----@return socket.tcp.server
+---@return socket.server
 function socket.bind(address, port, backlog) end
 
 ---This function is a shortcut that creates and returns a TCP client object connected
@@ -56,7 +56,7 @@ function socket.bind(address, port, backlog) end
 ---@param locaddr string
 ---@param locport integer
 ---@param family "inet"|"inet6"
----@return socket.tcp.client
+---@return socket.client
 function socket.connect(address, port, locaddr, locport, family) end
 
 ---This function is a shortcut that creates and returns a TCP client object connected
@@ -72,7 +72,7 @@ function socket.connect(address, port, locaddr, locport, family) end
 ---@param locaddr string
 ---@param locport integer
 ---@param family "inet"
----@return socket.tcp.client
+---@return socket.client
 function socket.connect4(address, port, locaddr, locport, family) end
 
 ---This function is a shortcut that creates and returns a TCP client object connected
@@ -88,7 +88,7 @@ function socket.connect4(address, port, locaddr, locport, family) end
 ---@param locaddr string
 ---@param locport integer
 ---@param family "inet6"
----@return socket.tcp.client
+---@return socket.client
 function socket.connect6(address, port, locaddr, locport, family) end
 
 ---Returns the UNIX time in seconds. You should subtract the values returned by
