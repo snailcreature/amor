@@ -21,7 +21,8 @@ def new(
     """
     Create a new project folder.
     """
-    from os import mkdir, path
+    from os import mkdir, path, environ
+    from shutil import copytree
     from toml import dump
     from git import Repo
     from rich import print
@@ -58,6 +59,14 @@ def new(
     print("[blue]Creating ./" + name + "/.luarc.json...")
     with open(f"./{name}/.luarc.json", "w") as luarc_file:
         luarc_file.writelines(luarc)
+
+    mkdir("./.amor/")
+    mkdir("./.amor/builtin/")
+    amor_dir = environ.get("AMOR_DIR")
+    if amor_dir is not None:
+        copytree(f"{amor_dir}/lsp/", "./.amor/builtin/")
+    else:
+        print("[yellow]AMOR_DIR is not set, so could not copy löve definitions")
 
     if git_init:
         print("[blue]Creating .gitignore...")

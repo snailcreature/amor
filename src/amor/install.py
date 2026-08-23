@@ -72,9 +72,9 @@ present, but does not exist on repository, the most current version will be inst
     modules: dict[str, AmorConfigDependency] = {}
 
     if force:
-        for dir in listdir("./.amor"):
+        for dir in listdir("./.amor/packages"):
             try:
-                rmtree(f"./.amor/{dir}/")
+                rmtree(f"./.amor/packages/{dir}/")
             except:
                 print(f"[red]Failed to delete {dir}")
                 raise typer.Exit(1)
@@ -283,14 +283,14 @@ present, but does not exist on repository, the most current version will be inst
 
                     mod_name = cast(str, mod_name)
 
-                    if path.exists(f"./.amor/{mod_name}"):
-                        rmtree(f"./.amor/{mod_name}")
+                    if path.exists(f"./.amor/packages/{mod_name}"):
+                        rmtree(f"./.amor/packages/{mod_name}")
 
                     cwd = getcwd()
                     try:
                         copytree(
                             f"{cwd}/.amor/tmp/build/lib/lua/5.4/",
-                            f"{cwd}/.amor/{mod_name}/",
+                            f"{cwd}/.amor/packages/{mod_name}/",
                         )
                     except:
                         p.console.print(
@@ -299,7 +299,7 @@ present, but does not exist on repository, the most current version will be inst
                         try:
                             copytree(
                                 f"{cwd}/.amor/tmp/build/share/lua/5.4/{mod_name}/",
-                                f"{cwd}/.amor/{mod_name}/",
+                                f"{cwd}/.amor/packages/{mod_name}/",
                             )
                         except:
                             p.console.print(f"Uh oh! {mod_name} could not be built!")
@@ -351,16 +351,16 @@ present, but does not exist on repository, the most current version will be inst
                 if not built_from_spec:
                     p.console.print("No build option found! Copying files...")
 
-                    if path.exists(f"./.amor/{mod_name}"):
-                        rmtree(f"./.amor/{mod_name}")
+                    if path.exists(f"./.amor/packages/{mod_name}"):
+                        rmtree(f"./.amor/packages/{mod_name}")
 
                     copytree(
                         "./.amor/tmp",
-                        f"./.amor/{mod_name}",
+                        f"./.amor/packages/{mod_name}",
                         ignore=include_patterns("*.lua", "*.so"),
                     )
 
-                    remove_empty_dirs(f"./.amor/{mod_name}/")
+                    remove_empty_dirs(f"./.amor/packages/{mod_name}/")
 
             rmtree("./.amor/tmp")
 

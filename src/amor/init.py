@@ -28,9 +28,11 @@ def init(
     from toml import load, dump
     from json import dump as jdump
     from git import Repo
-    from os import listdir
+    from os import listdir, environ
     from typing import cast
     from rich import print
+    from os import mkdir
+    from shutil import copytree
 
     from .types import AmorConfig
     from .constants import default_conf, gitignore_lines, gitattributes_lines, luarc
@@ -59,6 +61,14 @@ def init(
         print("[blue]Creating .luarc.json...")
         with open(".luarc.json", "w") as luarc_file:
             jdump(luarc, luarc_file)
+
+    mkdir("./.amor/")
+    mkdir("./.amor/builtin/")
+    amor_dir = environ.get("AMOR_DIR")
+    if amor_dir is not None:
+        copytree(f"{amor_dir}/lsp/", "./.amor/builtin/")
+    else:
+        print("[yellow]AMOR_DIR is not set, so could not copy löve definitions")
 
     if git_init:
         print("[blue]Creating .gitignore...")

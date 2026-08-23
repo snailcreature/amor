@@ -49,7 +49,7 @@ in a Lua script).""",
         for dep in to_delete:
             p.console.print(f"[blue]Uninstalling {dep}...")
             try:
-                rmtree(f"./.amor/{dep}")
+                rmtree(f"./.amor/packages/{dep}")
 
                 del conf["dependencies"][dep]
                 del lock[dep]
@@ -62,7 +62,7 @@ in a Lua script).""",
             clean_task = p.add_task("Cleaning up amor.lock...", total=len(lock_clean))
             for dep in lock_clean:
                 try:
-                    rmtree(f"./.amor/{dep}")
+                    rmtree(f"./.amor/packages/{dep}")
 
                     del lock[dep]
                     p.console.print(f"[green]Removed {dep} from amor.lock!")

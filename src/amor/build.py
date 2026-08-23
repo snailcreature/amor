@@ -54,17 +54,17 @@ def build(
     cwd = getcwd()
     lpath = lua.eval("package.path")
     cpath = lua.eval("package.cpath")
-    lua_path = f"./.amor/?.lua;./.amor/?/init.lua;./.amor/?/?.lua;./{source_dir}/?.lua;\
+    lua_path = f"./.amor/packages/?.lua;./.amor/packages/?/init.lua;./.amor/packages/?/?.lua;./{source_dir}/?.lua;\
             ./{source_dir}/?/init.lua;./{source_dir}/?/?.lua;{lpath}"
-    lua_cpath = f"{cwd}/.amor/?.so;./.amor/?/?.so;./{source_dir}/?.so;{cpath}"
+    lua_cpath = f"{cwd}/.amor/packages/?.so;./.amor/packages/?/?.so;./{source_dir}/?.so;{cpath}"
 
     print(lua.eval("os.getenv('PWD')"))
     # print(lua_path)
     if clean:
         rmtree(f"./{build_dir}")
 
-    if not path.exists("./.bld"):
-        mkdir("./.bld")
+    if not path.exists("./.amor/.bld"):
+        mkdir("./.amor/.bld")
 
     def recScanSource(file_path: str, mod_map: dict[str, str]) -> dict[str, str]:
         """
@@ -110,13 +110,13 @@ def build(
 
         # Save the found modules to .dat file
         split_path = file_path.split("/")
-        bld_path = "/".join(["./.bld"] + split_path[2:]).replace(".lua", ".dat")
+        bld_path = "/".join(["./.amor/.bld"] + split_path[2:]).replace(".lua", ".dat")
         if len(split_path) > 2 and not split_path[1].endswith(".lua"):
             for i in range(2, len(split_path) - 1):
                 tmp = "/".join(split_path[2 : i + 1])
                 # Save the dat file to the bld folder
-                if not path.exists(f"./.bld/{tmp}"):
-                    mkdir(f"./.bld/{tmp}")
+                if not path.exists(f"./.amor/.bld/{tmp}"):
+                    mkdir(f"./.amor/.bld/{tmp}")
 
         with open(bld_path, "wb") as dat:
             pdump(lua_ast, dat)
@@ -209,7 +209,7 @@ def build(
                 print("Built", comp_path)
         return
 
-    recCompile("./.bld")
+    recCompile("./.amor/.bld")
 
     def recRegisterAssets(dir: str, asset_dict={}):
         """

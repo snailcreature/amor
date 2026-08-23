@@ -30,6 +30,7 @@ format.
  - Switched to [`uv`](https://docs.astral.sh/uv/) package manager
  - Moved to [Typer](https://typer.tiangolo.com/) for CLI tooling, away from argparse
  - Updated `setup` to use `pip wheel` to build and install amor CLI
+ - Reworked `.amor/` directory structure to hold packages, built-in library definitions, and build artefacts (`.bld/`)
 
 ### Removed
 

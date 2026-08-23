@@ -37,7 +37,7 @@ luarc = {
     },
     "workspace": {
         "library": [
-            "${workspaceFolder}/.amor/",
+            "${workspaceFolder}/.amor/packages/",
             "${3rd}/love2d/",
         ],
         "ignoreDir": ["./.amor/", "./build/"],
